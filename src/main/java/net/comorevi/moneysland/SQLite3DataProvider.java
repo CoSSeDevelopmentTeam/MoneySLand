@@ -42,6 +42,7 @@ public class SQLite3DataProvider {
     public int getLand(int x, int z, String world) {
         try {
             ResultSet rs = statement.executeQuery("select * from land where (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
+
             if((rs.getBoolean(rs) && rs.getString("world")) != null) {
                 return rs.getInt("id");
             }

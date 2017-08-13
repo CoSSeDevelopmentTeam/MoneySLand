@@ -1,0 +1,5 @@
+﻿no-money-message: "土地を買えるお金を持っていません。"
+buy-land-message: "{%0}の広さの土地を{%1}{%2}で購入しました。"
+cannot-buy-message: "ここの土地を購入することができません。"
+invite-land-message: "{%0}さんの土地を{%1}さんと共有しました。"
+send-command-console: "landコマンドはゲーム内からの実行のみ許可されています。"

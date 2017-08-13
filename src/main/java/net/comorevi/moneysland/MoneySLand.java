@@ -1,53 +1,59 @@
 
 package net.comorevi.moneysland;
 
+import java.util.Map;
+
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.plugin.PluginBase;
+import cn.nukkit.utils.Config;
 
 public class MoneySLand extends PluginBase {
 
     private SQLite3DataProvider sql;
     private static MoneySLand instance;
     private String messages[];
-	
-	public static MoneySLand getInstance() {
-		return instance;
-	}
-	
-	/*
-	public わからない getLand(int x, int z, String world) {
-		return sql.getLand(x, z, world);
-	}
-	*/
-	
-	public boolean existsLand(int x, int z, String world) {
-		//return sql.existsLand(x, z, world);
-	}
-	
-	public void createLand(String owner, int[] start, int[] end, String world) {
-		sql.createLand(owner, start[0], start[1], end[0], end[1], world);
-	}
-	
-	public boolean isWorldProtect(String world) {
-		return false;
-	}
-	
-    @Override
-    public void onEnable() {
-        getDataFolder().mkdir();
-        getServer().getPluginManager().registerEvents(new EventListener(this), this);
-    }
+    private Config translateFile;
+    private Map<String, Object> configData;
 
-    @Override
-    public void onDisable() {
+    /**************/
+    /** Plug関連  */
+    /**************/
 
+    public static MoneySLand getInstance() {
+        return instance;
     }
 
     public SQLite3DataProvider getSQL() {
         return this.sql;
+    }
+
+    /**************/
+    /** Land関連  */
+    /**************/
+
+    /*
+    public わからない getLand(int x, int z, String world) {
+        return sql.getLand(x, z, world);
+    }
+    */
+
+    public boolean existsLand(int x, int z, String world) {
+        //return sql.existsLand(x, z, world);
+    }
+
+    public void createLand(String owner, int[] start, int[] end, String world) {
+        sql.createLand(owner, start[0], start[1], end[0], end[1], world);
+    }
+
+    public boolean isWorldProtect(String world) {
+        return false;
+    }
+
+    public boolean isWorldProtect(){
+        return false;
     }
 
     public boolean isEditable(int x, int z, String world, Player player){
@@ -69,16 +75,43 @@ public class MoneySLand extends PluginBase {
         return false;//仮。エラー回避
     }
 
-    public boolean isWorldProtect(){
+    /**************/
+    /** 金銭関連  */
+    /**************/
+
+    public int calculateLandPrice(String name) {
+        return 0;
+    }
+
+    public boolean checkOverLap(int[] start, int[] end, String world) {
         return false;
     }
+
+    /**************/
+    /** 起動関連  */
+    /**************/
+
+    @Override
+    public void onEnable() {
+        getDataFolder().mkdir();
+        getServer().getPluginManager().registerEvents(new EventListener(this), this);
+    }
+
+    @Override
+    public void onDisable() {
+
+    }
+
+    /**************/
+    /** コマンド  */
+    /**************/
 
     public boolean onCommand(final CommandSender sender, Command command, String label, String[] args){
 
         if(command.getName().equals("land")){
 
             if(sender instanceof ConsoleCommandSender){
-                sender.sendMessage("MoneySLand>>注意 landコマンドはゲーム内からの実行のみ許可されています。");
+                sender.sendMessage(TextValues.WARNING + this.translateString("send-command-console"));
                 return true;
             }
 
@@ -90,8 +123,12 @@ public class MoneySLand extends PluginBase {
 
             String name = sender.getName().toLowerCase();
 
+            Player p = (Player)sender;
+
             switch(args[0]){
                 case "start":
+                    int x = (int)p.getX();
+                    int z = (int)p.getZ();
                     return true;
 
                 case "end":
@@ -118,26 +155,33 @@ public class MoneySLand extends PluginBase {
         return false;
     }
 
+    /****************/
+    /** メッセージ **/
+    /****************/
+
     public void helpMessage(CommandSender sender){
         //適宜書いておいてください。
         //getMessage()は使用しなくても大丈夫だと思ったので。
-        sender.sendMessage("MoneySLand>>ヘルプ");
+        sender.sendMessage(TextValues.HELP);
     }
-    
-	
-	public boolean checkOverLap(int[] start, int[] end, String world) {
-		return false;
-	}
-	
-	public String getMessage(String str, int[] param) {
-		return "";
-	}
-	
-	public String parseMessage(String message) {
-		return "";
-	}
-	
-	public int calculateLandPrice(String name) {
-		return 0;
-	}
+
+    public String parseMessage(String message) {
+        return "";
+    }
+
+    public void initMessageConfig(){
+        this.translateFile = new Config();
+        this.translateFile.load(this.getClass().getClassLoader().getResourceAsStream("Message.yml"));
+        this.configData = this.translateFile.getAll();
+        return;
+    }
+
+    public String translateString(String key, String... args){
+        String src = (String) configData.get(key);
+        for(int i=0;i < args.length;i++){
+            src = src.replaceAll("{%" + i + "}", args[i]);
+        }
+        return src;
+    }
+
 }
