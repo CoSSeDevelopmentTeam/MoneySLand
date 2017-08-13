@@ -1,10 +1,9 @@
 package net.comorevi.moneysland;
 
 import cn.nukkit.plugin.PluginBase;
-import cn.nukkit.event.Listener;
 import net.comorevi.moneysland.SQLite3DataProvider;
 
-public class MoneySLand extends PluginBase implements Listener {
+public class MoneySLand extends PluginBase {
 	
 	private SQLite3DataProvider sql;
 	
