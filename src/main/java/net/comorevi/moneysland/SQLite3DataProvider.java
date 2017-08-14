@@ -1,14 +1,11 @@
 package net.comorevi.moneysland;
 
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SQLite3DataProvider {
@@ -77,7 +74,7 @@ public class SQLite3DataProvider {
     }
 
     public int getAllLands() {
-    	try {
+        try {
             ResultSet rs = statement.executeQuery("select * from land");
             for(int i=0;i < rs.getFetchSize();i++){
                 if(!(rs.getBoolean(i)) && (rs.getString("world") != null)) {
@@ -89,21 +86,26 @@ public class SQLite3DataProvider {
         }
         return 0;
     }
-    
+
     public boolean existsLand(int x, int z, String world) {
-    	
+        return false;//仮
     }
-    
+
     public void addGuest(int id, String name) {
-    	ArrayList<Object> land = getLandById(id);
-    	
-    	if(land = null) return false;
-    	
-    	statement.executeUpdate("insert into invite values("+ id +", '"+ name +"'");
+        Map<String, Object> land = getLandById(id);
+
+        if(land == null)return;
+
+        try {
+            statement.executeUpdate("insert into invite values("+ id +", '"+ name +"'");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return;
     }
-    
+
     public boolean existsGuest(int id, String name) {
-    	return false;
+        return false;
     }
 
 }

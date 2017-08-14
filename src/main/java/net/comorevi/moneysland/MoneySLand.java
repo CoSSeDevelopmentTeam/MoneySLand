@@ -253,7 +253,6 @@ public class MoneySLand extends PluginBase {
                     this.helpMessage(sender);
                     return true;
             }
-
         }
         return false;
     }
@@ -272,7 +271,7 @@ public class MoneySLand extends PluginBase {
         return "";
     }
 
-    public void initMessageConfig(){
+    private void initMessageConfig(){
         this.translateFile = new Config();
         this.translateFile.load(this.getClass().getClassLoader().getResourceAsStream("Message.yml"));
         this.configData = this.translateFile.getAll();
