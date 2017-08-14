@@ -1,6 +1,7 @@
 
 package net.comorevi.moneysland;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import cn.nukkit.Player;
@@ -12,11 +13,14 @@ import cn.nukkit.utils.Config;
 
 public class MoneySLand extends PluginBase {
 
+    private static final String UNIT = "MS";
+
     private SQLite3DataProvider sql;
     private static MoneySLand instance;
     private String messages[];
     private Config translateFile;
     private Map<String, Object> configData;
+    private Map<String, Map<Integer, Integer>[]> setPos = new HashMap<String, Map<Integer, Integer>[]>();
 
     /**************/
     /** Plug関連  */
@@ -93,8 +97,10 @@ public class MoneySLand extends PluginBase {
 
     @Override
     public void onEnable() {
-        getDataFolder().mkdir();
-        getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        this.getDataFolder().mkdir();
+        this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
+
+        this.initMessageConfig();
     }
 
     @Override
@@ -127,11 +133,29 @@ public class MoneySLand extends PluginBase {
 
             switch(args[0]){
                 case "start":
-                    int x = (int)p.getX();
-                    int z = (int)p.getZ();
+                    int startX = (int)p.getX();
+                    int startZ = (int)p.getZ();
+
+                    this.setPos.get(name)[0].put(startX, startZ);
+                    p.sendMessage(this.translateString("player-setPosition", String.valueOf(1), String.valueOf(startX), String.valueOf(startZ)));
+
+                    if(!(this.setPos.get(name) == null) && this.setPos.get(name).length >= 2){
+                        int price = this.calculateLandPrice(name);
+                        p.sendMessage(this.translateString("player-landPrice", String.valueOf(price), UNIT));
+                    }
                     return true;
 
                 case "end":
+                    int endX = (int)p.getX();
+                    int endZ = (int)p.getZ();
+
+                    this.setPos.get(name)[1].put(endX, endZ);
+                    p.sendMessage(this.translateString("player-setPosition", String.valueOf(2), String.valueOf(endX), String.valueOf(endZ)));
+
+                    if(!(this.setPos.get(name) == null) && this.setPos.get(name).length >= 2){
+                        int price = this.calculateLandPrice(name);
+                        p.sendMessage(this.translateString("player-landPrice", String.valueOf(price), UNIT));
+                    }
                     return true;
 
                 case "buy":
