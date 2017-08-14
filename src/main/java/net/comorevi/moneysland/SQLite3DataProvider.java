@@ -1,16 +1,19 @@
 package net.comorevi.moneysland;
 
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SQLite3DataProvider {
 
     private MoneySLand plugin;
     private Statement statement;
+    private List<Array> land = new ArrayList<Array>();
 
     public SQLite3DataProvider(MoneySLand plugin) {
         this.plugin = plugin;
@@ -42,13 +45,15 @@ public class SQLite3DataProvider {
     public int getLand(int x, int z, String world) {
         try {
             ResultSet rs = statement.executeQuery("select * from land where (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
-
-            if((rs.getBoolean(rs) && rs.getString("world")) != null) {
-                return rs.getInt("id");
+            for(int i=0;i < rs.getFetchSize();i++){
+                if(!(rs.getBoolean(i)) && (rs.getString("world") != null)) {
+                    return rs.getInt("id");
+                }
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
+        return 0;
     }
 
 
