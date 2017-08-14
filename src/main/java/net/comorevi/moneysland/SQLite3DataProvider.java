@@ -87,5 +87,21 @@ public class SQLite3DataProvider {
         }
         return 0;
     }
+    
+    public existsLand(int x, int z, String world) {
+    	
+    }
+    
+    public void addGuest(int id, String name) {
+    	ArrayList<Object> land = getLandById(id);
+    	
+    	if(land = null) return false;
+    	
+    	statement.executeUpdate("insert into invite values("+ id +", '"+ name +"'");
+    }
+    
+    public existsGuest(int id, String name) {
+    	
+    }
 
 }
