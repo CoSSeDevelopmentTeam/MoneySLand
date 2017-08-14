@@ -13,7 +13,6 @@ public class SQLite3DataProvider {
 
     private MoneySLand plugin;
     private Statement statement;
-    private List<Array> land = new ArrayList<Array>();
 
     public SQLite3DataProvider(MoneySLand plugin) {
         this.plugin = plugin;
@@ -75,19 +74,18 @@ public class SQLite3DataProvider {
         return null;
     }
 
-    public ArrayList<Object> getAllLands() {
-        ResultSet rs;
-        ArrayList<Object> list = new ArrayList<Object>();
-        try {
-            rs = statement.executeQuery("select * from land");
-            while(rs.next()) {
-                list.add(rs.getInt("id"));
+    public int getAllLands() {
+    	try {
+            ResultSet rs = statement.executeQuery("select * from land");
+            for(int i=0;i < rs.getFetchSize();i++){
+                if(!(rs.getBoolean(i)) && (rs.getString("world") != null)) {
+                    return rs.getInt("id");
+                }
             }
-            return list;
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
-        return null;
+        return 0;
     }
 
 }
