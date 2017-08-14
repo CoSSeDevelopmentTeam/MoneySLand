@@ -139,7 +139,7 @@ public class MoneySLand extends PluginBase {
                     this.setPos.get(name)[0].put(startX, startZ);
                     p.sendMessage(this.translateString("player-setPosition", String.valueOf(1), String.valueOf(startX), String.valueOf(startZ)));
 
-                    if(!(this.setPos.get(name) == null) && this.setPos.get(name).length >= 2){
+                    if(!(this.setPos.get(name).length == 0) && this.setPos.get(name).length >= 2){
                         int price = this.calculateLandPrice(name);
                         p.sendMessage(this.translateString("player-landPrice", String.valueOf(price), UNIT));
                     }
@@ -152,7 +152,7 @@ public class MoneySLand extends PluginBase {
                     this.setPos.get(name)[1].put(endX, endZ);
                     p.sendMessage(this.translateString("player-setPosition", String.valueOf(2), String.valueOf(endX), String.valueOf(endZ)));
 
-                    if(!(this.setPos.get(name) == null) && this.setPos.get(name).length >= 2){
+                    if(!(this.setPos.get(name).length == 0) && this.setPos.get(name).length >= 2){
                         int price = this.calculateLandPrice(name);
                         p.sendMessage(this.translateString("player-landPrice", String.valueOf(price), UNIT));
                     }
