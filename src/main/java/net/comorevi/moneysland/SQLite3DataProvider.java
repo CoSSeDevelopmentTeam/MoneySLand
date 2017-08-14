@@ -88,7 +88,7 @@ public class SQLite3DataProvider {
         return 0;
     }
     
-    public existsLand(int x, int z, String world) {
+    public boolean existsLand(int x, int z, String world) {
     	
     }
     
@@ -100,8 +100,8 @@ public class SQLite3DataProvider {
     	statement.executeUpdate("insert into invite values("+ id +", '"+ name +"'");
     }
     
-    public existsGuest(int id, String name) {
-    	
+    public boolean existsGuest(int id, String name) {
+    	return false;
     }
 
 }
