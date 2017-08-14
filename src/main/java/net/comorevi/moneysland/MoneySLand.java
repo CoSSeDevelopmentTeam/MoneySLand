@@ -10,17 +10,21 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
+import net.comorevi.moneyapi.MoneySAPI;
 
 public class MoneySLand extends PluginBase {
 
     private static final String UNIT = "MS";
+    private static final int landPrice = 100;
+    private MoneySAPI money;
 
     private SQLite3DataProvider sql;
     private static MoneySLand instance;
     private String messages[];
     private Config translateFile;
     private Map<String, Object> configData;
-    private Map<String, Map<Integer, Integer>[]> setPos = new HashMap<String, Map<Integer, Integer>[]>();
+    private Map<String, Integer[][]> setPos = new HashMap<String, Integer[][]>();
+
 
     /**************/
     /** Plug関連  */
@@ -100,6 +104,14 @@ public class MoneySLand extends PluginBase {
         this.getDataFolder().mkdir();
         this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
 
+        try{
+            this.money = (MoneySAPI) this.getServer().getPluginManager().getPlugin("MoneySAPI");
+        }catch(Exception e){
+            this.getLogger().alert(TextValues.ALERT + this.translateString("no-moneysapi"));
+            this.getServer().getPluginManager().disablePlugin(this);
+        }
+
+
         this.initMessageConfig();
     }
 
@@ -136,12 +148,13 @@ public class MoneySLand extends PluginBase {
                     int startX = (int)p.getX();
                     int startZ = (int)p.getZ();
 
-                    this.setPos.get(name)[0].put(startX, startZ);
-                    p.sendMessage(this.translateString("player-setPosition", String.valueOf(1), String.valueOf(startX), String.valueOf(startZ)));
+                    this.setPos.get(name)[0][0] = startX;
+                    this.setPos.get(name)[0][1] = startZ;
+                    p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(1), String.valueOf(startX), String.valueOf(startZ)));
 
                     if(!(this.setPos.get(name).length == 0) && this.setPos.get(name).length >= 2){
                         int price = this.calculateLandPrice(name);
-                        p.sendMessage(this.translateString("player-landPrice", String.valueOf(price), UNIT));
+                        p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
                     }
                     return true;
 
@@ -149,22 +162,90 @@ public class MoneySLand extends PluginBase {
                     int endX = (int)p.getX();
                     int endZ = (int)p.getZ();
 
-                    this.setPos.get(name)[1].put(endX, endZ);
-                    p.sendMessage(this.translateString("player-setPosition", String.valueOf(2), String.valueOf(endX), String.valueOf(endZ)));
+                    this.setPos.get(name)[1][0] = endX;
+                    this.setPos.get(name)[1][1] = endZ;
+                    p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(2), String.valueOf(endX), String.valueOf(endZ)));
 
                     if(!(this.setPos.get(name).length == 0) && this.setPos.get(name).length >= 2){
                         int price = this.calculateLandPrice(name);
-                        p.sendMessage(this.translateString("player-landPrice", String.valueOf(price), UNIT));
+                        p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
                     }
                     return true;
 
                 case "buy":
-                    return true;
+                    if(this.setPos.get(name).length == 0 || this.setPos.get(name).length < 2){
+                        p.sendMessage(TextValues.ALERT + this.translateString("player-buyError1"));
+                        return true;
+                    }
+
+                    String worldName = p.getLevel().getName();
+
+                    int[] start = new int[]{};
+                    int[] end = new int[]{};
+
+                    start[0] = Math.min(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
+                    start[1] = Math.max(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
+                    end[0] = Math.min(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
+                    end[1] = Math.max(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
+
+                    if(!this.checkOverLap(start, end, worldName)){
+                        int price = (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * landPrice;
+
+                        String nameB = p.getName().toLowerCase();
+                        if(this.money.getMoney(p) >=price){
+                            this.createLand(nameB, start, end, worldName);
+                            p.sendMessage(TextValues.INFO + this.translateString("player-landBuy", String.valueOf(price), UNIT));
+                            this.money.grantMoney(p, price);
+                            return true;
+                        }else{
+                            p.sendMessage(TextValues.ALERT + this.translateString("no-money-message"));
+                            return true;
+                        }
+                    }else{
+                        p.sendMessage(TextValues.ALERT + this.translateString("land-already-used"));
+                        return true;
+                    }
 
                 case "sell":
                     return true;
 
                 case "invite":
+                    if(!(args.length >= 3)){
+                        p.sendMessage(TextValues.ALERT + this.translateString("error-command-message1"));
+                        return true;
+                    }
+
+                    int id;
+
+                    try{
+                        id = Integer.parseInt(args[1]);
+                    }catch(NumberFormatException e){
+                        p.sendMessage(TextValues.ALERT + this.translateString("error-command-message2"));
+                        return true;
+                    }
+
+                    Map<String, Object> land = this.getSQL().getLandById(id);
+
+                    if(land != null){
+                        if(land.get("owner").equals(name)){
+                            String guest = args[2].toLowerCase();
+                            if(!(this.getSQL().existsGuest(id, guest))){
+                                p.sendMessage(TextValues.INFO + this.translateString("invite-land-message", name, guest));
+                                if(this.getServer().getPlayer(guest) != null){
+                                    this.getServer().getPlayer(guest).sendMessage(TextValues.INFO + this.translateString("invite-land-message", name, guest));
+                                }
+                            }else{
+                                p.sendMessage(TextValues.ALERT + this.translateString("error-invite"));
+                                return true;
+                            }
+                        }else{
+                            p.sendMessage(TextValues.ALERT + this.translateString("error-invite"));
+                            return true;
+                        }
+                    }else{
+                        p.sendMessage(TextValues.ALERT + this.translateString("error-all"));
+                        return true;
+                    }
                     return true;
 
                 case "info":

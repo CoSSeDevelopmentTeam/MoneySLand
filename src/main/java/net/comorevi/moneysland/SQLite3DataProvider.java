@@ -7,7 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SQLite3DataProvider {
 
@@ -57,17 +59,17 @@ public class SQLite3DataProvider {
     }
 
 
-    public ArrayList<Object> getLandById(int id) {
-        ArrayList<Object> list = new ArrayList<Object>();
+    public Map<String, Object> getLandById(int id) {
+        Map<String, Object> list = new HashMap<String, Object>();
         try {
             ResultSet rs = statement.executeQuery("select * from land where (id = "+ id +")");
-            list.add(rs.getInt("id"));
-            list.add(rs.getShort("owner"));
-            list.add(rs.getInt("startx"));
-            list.add(rs.getInt("startz"));
-            list.add(rs.getInt("endx"));
-            list.add(rs.getInt("endz"));
-            list.add(rs.getShort("world"));
+            list.put("id", rs.getInt("id"));
+            list.put("owner", rs.getShort("owner"));
+            list.put("startx", rs.getInt("startx"));
+            list.put("startz", rs.getInt("startz"));
+            list.put("endx", rs.getInt("endx"));
+            list.put("endz", rs.getInt("endz"));
+            list.put("world", rs.getShort("world"));
             return list;
         } catch (SQLException e) {
             System.err.println(e.getMessage());
