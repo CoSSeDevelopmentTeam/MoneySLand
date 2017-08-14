@@ -15,7 +15,6 @@ public class SQLite3DataProvider {
 
     private MoneySLand plugin;
     private Statement statement;
-    private List<Array> land = new ArrayList<Array>();
 
     public SQLite3DataProvider(MoneySLand plugin) {
         this.plugin = plugin;
@@ -77,19 +76,34 @@ public class SQLite3DataProvider {
         return null;
     }
 
-    public ArrayList<Object> getAllLands() {
-        ResultSet rs;
-        ArrayList<Object> list = new ArrayList<Object>();
-        try {
-            rs = statement.executeQuery("select * from land");
-            while(rs.next()) {
-                list.add(rs.getInt("id"));
+    public int getAllLands() {
+    	try {
+            ResultSet rs = statement.executeQuery("select * from land");
+            for(int i=0;i < rs.getFetchSize();i++){
+                if(!(rs.getBoolean(i)) && (rs.getString("world") != null)) {
+                    return rs.getInt("id");
+                }
             }
-            return list;
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
-        return null;
+        return 0;
+    }
+    
+    public boolean existsLand(int x, int z, String world) {
+    	
+    }
+    
+    public void addGuest(int id, String name) {
+    	ArrayList<Object> land = getLandById(id);
+    	
+    	if(land = null) return false;
+    	
+    	statement.executeUpdate("insert into invite values("+ id +", '"+ name +"'");
+    }
+    
+    public boolean existsGuest(int id, String name) {
+    	return false;
     }
 
 }

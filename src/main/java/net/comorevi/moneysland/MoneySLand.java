@@ -42,14 +42,12 @@ public class MoneySLand extends PluginBase {
     /** Land関連  */
     /**************/
 
-    /*
-    public わからない getLand(int x, int z, String world) {
+    public int getLand(int x, int z, String world) {
         return sql.getLand(x, z, world);
     }
-    */
 
     public boolean existsLand(int x, int z, String world) {
-        //return sql.existsLand(x, z, world);
+        return false;//sql.existsLand(x, z, world);
     }
 
     public void createLand(String owner, int[] start, int[] end, String world) {
