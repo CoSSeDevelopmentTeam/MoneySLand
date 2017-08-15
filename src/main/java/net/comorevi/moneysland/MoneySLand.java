@@ -8,6 +8,7 @@ import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
+import cn.nukkit.level.Level;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 import net.comorevi.moneyapi.MoneySAPI;
@@ -249,6 +250,17 @@ public class MoneySLand extends PluginBase {
                     return true;
 
                 case "info":
+                    Level level = p.getLevel();
+                    int x = (int)p.getX();
+                    int z = (int)p.getZ();
+                    String world = level.getName();
+                    int landId = -1;
+
+                    if(this.existsLand(x, z, world)){
+                        landId = this.getLand(x, z, world);
+                    }else{
+                        p.sendMessage(TextValues.INFO + this.translateString("player-landId", String.valueOf(landId)));
+                    }
                     return true;
 
                 case "help":

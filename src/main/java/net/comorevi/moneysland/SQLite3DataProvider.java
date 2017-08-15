@@ -120,9 +120,11 @@ public class SQLite3DataProvider {
     }
 
     public boolean existsGuest(int id, String name) {
+        Map<String, Object> list = new HashMap<String, Object>();
         try {
             ResultSet rs = statement.executeQuery("select count * from invite where id = " + id + "and name = " + name);
-
+            list.put("id", rs.getInt("id"));
+            list.put("name", rs.getString("name"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
