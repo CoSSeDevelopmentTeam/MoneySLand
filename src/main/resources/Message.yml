@@ -3,6 +3,7 @@ player-landPrice: "選択された土地の価格は{%0}{%1}です。購入し�
 player-landBuy: "{%0}の広さの土地を{%1}{%2}で購入しました。"
 player-landInvited: "{%0}さんの土地を{%1}さんと共有しました。"
 player-landId: "ここの土地の番号は{%0}です。"
+player-noSuchLandId: "誰も所有していません。"
 error-command-message1: "適切な引数を入力してください。"
 error-command-message2: "2番目の引数には数値を入力してください。"
 error-command-console: "landコマンドはゲーム内からの実行のみ許可されています。"

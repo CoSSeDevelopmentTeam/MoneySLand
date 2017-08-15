@@ -258,6 +258,10 @@ public class MoneySLand extends PluginBase {
 
                     if(this.existsLand(x, z, world)){
                         landId = this.getLand(x, z, world);
+                    }
+
+                    if(landId == -1){
+                        p.sendMessage(TextValues.INFO + this.translateString("player-noSuchLandId"));
                     }else{
                         p.sendMessage(TextValues.INFO + this.translateString("player-landId", String.valueOf(landId)));
                     }
