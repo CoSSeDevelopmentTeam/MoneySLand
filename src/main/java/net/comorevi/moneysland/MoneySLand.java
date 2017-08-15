@@ -101,11 +101,12 @@ public class MoneySLand extends PluginBase {
     public void onEnable() {
         this.getDataFolder().mkdir();
         this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        this.getLogger().info(this.translateString("message-onEnable"));
 
         try{
             this.money = (MoneySAPI) this.getServer().getPluginManager().getPlugin("MoneySAPI");
         }catch(Exception e){
-            this.getLogger().alert(TextValues.ALERT + this.translateString("no-moneysapi"));
+            this.getLogger().alert(TextValues.ALERT + this.translateString("error-no-moneysapi"));
             this.getServer().getPluginManager().disablePlugin(this);
         }
 
@@ -127,7 +128,7 @@ public class MoneySLand extends PluginBase {
         if(command.getName().equals("land")){
 
             if(sender instanceof ConsoleCommandSender){
-                sender.sendMessage(TextValues.WARNING + this.translateString("send-command-console"));
+                sender.sendMessage(TextValues.WARNING + this.translateString("error-command-console"));
                 return true;
             }
 
@@ -172,7 +173,7 @@ public class MoneySLand extends PluginBase {
 
                 case "buy":
                     if(this.setPos.get(name).length == 0 || this.setPos.get(name).length < 2){
-                        p.sendMessage(TextValues.ALERT + this.translateString("player-buyError1"));
+                        p.sendMessage(TextValues.ALERT + this.translateString("error-not-selected"));
                         return true;
                     }
 
@@ -188,19 +189,20 @@ public class MoneySLand extends PluginBase {
 
                     if(!this.checkOverLap(start, end, worldName)){
                         int price = (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * landPrice;
+                        int s = (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * 1;
 
                         String nameB = p.getName().toLowerCase();
                         if(this.money.getMoney(p) >=price){
                             this.createLand(nameB, start, end, worldName);
-                            p.sendMessage(TextValues.INFO + this.translateString("player-landBuy", String.valueOf(price), UNIT));
+                            p.sendMessage(TextValues.INFO + this.translateString("player-landBuy", String.valueOf(s), String.valueOf(price), UNIT));
                             this.money.grantMoney(p, price);
                             return true;
                         }else{
-                            p.sendMessage(TextValues.ALERT + this.translateString("no-money-message"));
+                            p.sendMessage(TextValues.ALERT + this.translateString("error-no-money"));
                             return true;
                         }
                     }else{
-                        p.sendMessage(TextValues.ALERT + this.translateString("land-already-used"));
+                        p.sendMessage(TextValues.ALERT + this.translateString("error-land-alreadyused"));
                         return true;
                     }
 
@@ -228,9 +230,9 @@ public class MoneySLand extends PluginBase {
                         if(land.get("owner").equals(name)){
                             String guest = args[2].toLowerCase();
                             if(!(this.getSQL().existsGuest(id, guest))){
-                                p.sendMessage(TextValues.INFO + this.translateString("invite-land-message", name, guest));
+                                p.sendMessage(TextValues.INFO + this.translateString("player-landInvited", name, guest));
                                 if(this.getServer().getPlayer(guest) != null){
-                                    this.getServer().getPlayer(guest).sendMessage(TextValues.INFO + this.translateString("invite-land-message", name, guest));
+                                    this.getServer().getPlayer(guest).sendMessage(TextValues.INFO + this.translateString("player-landInvited", name, guest));
                                 }
                             }else{
                                 p.sendMessage(TextValues.ALERT + this.translateString("error-invite"));
@@ -265,6 +267,7 @@ public class MoneySLand extends PluginBase {
         //適宜書いておいてください。
         //getMessage()は使用しなくても大丈夫だと思ったので。
         sender.sendMessage(TextValues.HELP);
+        sender.sendMessage("/land <start | end | buy | sell | invite | info>");
     }
 
     public String parseMessage(String message) {

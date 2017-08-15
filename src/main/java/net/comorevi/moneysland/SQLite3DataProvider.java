@@ -54,7 +54,6 @@ public class SQLite3DataProvider {
         return 0;
     }
 
-
     public Map<String, Object> getLandById(int id) {
         Map<String, Object> list = new HashMap<String, Object>();
         try {
@@ -88,7 +87,23 @@ public class SQLite3DataProvider {
     }
 
     public boolean existsLand(int x, int z, String world) {
-        return false;//仮
+        Map<String, Object> list = new HashMap<String, Object>();
+        try {
+            ResultSet rs = statement.executeQuery("select count * from land where (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
+            list.put("x", rs.getInt("x"));
+            list.put("y", rs.getInt("y"));
+            list.put("world", rs.getString("world"));
+
+            /*どっちかわからない。
+             * 本家:
+             * return $landCount[0] > 0;
+             */
+            //return (int)list.get(0) > 0;
+            return (rs.getFetchSize() > 0);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public void addGuest(int id, String name) {
@@ -105,6 +120,12 @@ public class SQLite3DataProvider {
     }
 
     public boolean existsGuest(int id, String name) {
+        try {
+            ResultSet rs = statement.executeQuery("select count * from invite where id = " + id + "and name = " + name);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
