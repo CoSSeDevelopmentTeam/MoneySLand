@@ -15,4 +15,7 @@ error-land-alreadyused: "この土地はすでに他の人が購入していま�
 error-not-selected: "地点が設定されていません。"
 error-no-moneysapi: "MoneySAPIプラグインが存在しないか、読み込みに失敗したためプラグインを無効化します。"
 error-all: "エラーが発生しました。"
+error-landSizeLimitOver: "選択された土地の広さ({%0}ブロック)が制限({%1}ブロック)より広すぎます。狭めてください。"
+error-notFoundKey: "要求されたキーが見つかりません。Message.ymlを削除して再起動し、メッセージファイルの再生成を試みてください。"
 message-onEnable: "§a起動しました。"
+message-onEnable2: "§e土地価格(1ブロック当たり):{%0}{%1}, 購入可能土地サイズ制限:{%2}ブロック"
