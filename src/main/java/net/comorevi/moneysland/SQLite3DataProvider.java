@@ -39,6 +39,21 @@ public class SQLite3DataProvider {
             System.err.println(e.getMessage());
         }
     }
+    
+    public void deleteLand(String name, int x, int z, String world) {
+    	Map<String, Object> land = getLand(x, z, world);
+    	int id = (int) land.get("id");
+    	String owner = (String) land.get("owner");
+    	try {
+    		if(owner.equals(name)) {
+    			statement.executeUpdate("delete from land where id = "+ id);
+    		} else {
+    			//持ち主じゃないってメッセージ
+    		}
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		}
+    }
 
     public Map<String, Object> getLand(int x, int z, String world) {
         Map<String, Object> list = new HashMap<String, Object>();
