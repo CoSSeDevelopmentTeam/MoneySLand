@@ -8,14 +8,24 @@
  * GitHub: https://github.com/CosmoSunriseServerPluginEditorsTeam
  *
  *
+ * このプラグインはMasterF氏開発のMyLandプラグインを開発者の承認を得てJavaに移植をしたものです。
+ *
+ *
+ * [Java版]
  * @author itsu
  * @author popkechupki
+ *
+ * [PHP版]
+ * @author MasterF
  *
  *
  * 機能版 アップデート履歴
  *
  * - 1.0
  *    基本的な機能を追加。ほぼ動作するように。
+ *  - 1.1
+ *    著作権表記並びにコードの位置を修正
+ *
  */
 
 package net.comorevi.moneysland;
@@ -113,7 +123,7 @@ public class MoneySLand extends PluginBase {
     }
 
     /**************/
-    /** 金銭関連  */
+    /** 計算関連  */
     /**************/
 
     public int calculateLandPrice(String name) {
@@ -369,9 +379,24 @@ public class MoneySLand extends PluginBase {
         sender.sendMessage("/land <start | end | buy | sell | invite | info>");
     }
 
+    public String translateString(String key, String... args){
+        if(configData != null || !configData.isEmpty()){
+            String src = (String) configData.get(key);
+            for(int i=0;i < args.length;i++){
+                src = src.replace("{%" + i + "}", args[i]);
+            }
+            return src;
+        }
+        return null;
+    }
+
     public String parseMessage(String message) {
         return "";
     }
+
+    /**************/
+    /**  その他  **/
+    /**************/
 
     private void initMessageConfig(){
         if(!new File("./plugins/MoneySLand/Message.yml").exists()){
@@ -418,17 +443,6 @@ public class MoneySLand extends PluginBase {
         landSize = (int) pluginData.get("landSize");
 
         return;
-    }
-
-    public String translateString(String key, String... args){
-        if(configData != null || !configData.isEmpty()){
-            String src = (String) configData.get(key);
-            for(int i=0;i < args.length;i++){
-                src = src.replace("{%" + i + "}", args[i]);
-            }
-            return src;
-        }
-        return null;
     }
 
 }
