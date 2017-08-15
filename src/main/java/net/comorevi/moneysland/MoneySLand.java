@@ -43,7 +43,7 @@ public class MoneySLand extends PluginBase {
     /** Land関連  */
     /**************/
 
-    public int getLand(int x, int z, String world) {
+    public Map<String, Object> getLand(int x, int z, String world) {
         return sql.getLand(x, z, world);
     }
 
@@ -65,21 +65,23 @@ public class MoneySLand extends PluginBase {
 
     public boolean isEditable(int x, int z, String world, Player player){
         if(player.isOp())return true;
-        int land = this.getSQL().getLand(x, z, world);
-        if(land == 0){
-            return !(this.isWorldProtect());
+        try{
+            Map<String, Object> land = this.getSQL().getLand(x, z, world);
+            int landId = (int)land.get("id");
+            if(landId == 0){
+                return !(this.isWorldProtect());
+            }
+
+            String name = player.getName().toLowerCase();
+
+            if(land.get("owner").equals(name)){
+                return true;
+            }
+
+            return this.getSQL().existsGuest((int)land.get("id"), name);
+        }catch(NullPointerException e){
+            return false;
         }
-
-        String name = player.getName().toLowerCase();
-
-        /* わからん()
-        if(land["owner"].equals(name)){
-            return true;
-        }
-        */
-
-        //return this.getSQL().existsGuest(land["id"], name);
-        return false;//仮。エラー回避
     }
 
     /**************/
@@ -250,22 +252,27 @@ public class MoneySLand extends PluginBase {
                     return true;
 
                 case "info":
-                    Level level = p.getLevel();
-                    int x = (int)p.getX();
-                    int z = (int)p.getZ();
-                    String world = level.getName();
-                    int landId = -1;
+                    try{
+                        Level level = p.getLevel();
+                        int x = (int)p.getX();
+                        int z = (int)p.getZ();
+                        String world = level.getName();
+                        int landId = -1;
 
-                    if(this.existsLand(x, z, world)){
-                        landId = this.getLand(x, z, world);
-                    }
+                        if(this.existsLand(x, z, world)){
+                            landId = (int)this.getLand(x, z, world).get("id");
+                        }
 
-                    if(landId == -1){
-                        p.sendMessage(TextValues.INFO + this.translateString("player-noSuchLandId"));
-                    }else{
-                        p.sendMessage(TextValues.INFO + this.translateString("player-landId", String.valueOf(landId)));
+                        if(landId == -1){
+                            p.sendMessage(TextValues.INFO + this.translateString("player-noSuchLandId"));
+                        }else{
+                            p.sendMessage(TextValues.INFO + this.translateString("player-landId", String.valueOf(landId)));
+                        }
+                        return true;
+                    }catch(NullPointerException e){
+                        p.sendMessage(TextValues.INFO + this.translateString("error-all"));
+                        return true;
                     }
-                    return true;
 
                 case "help":
                     this.helpMessage(sender);
