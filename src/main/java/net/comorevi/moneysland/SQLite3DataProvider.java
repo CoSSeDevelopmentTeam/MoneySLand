@@ -44,20 +44,13 @@ public class SQLite3DataProvider {
         Map<String, Object> list = new HashMap<String, Object>();
         try {
             ResultSet rs = statement.executeQuery("select * from land where (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
-            /*
-            for(int i=0;i < rs.getFetchSize();i++){
-                if(!(rs.getBoolean(i)) && (rs.getString("world") != null)) {
-                    return rs.getInt("id");
-                }
-            }
-            */
             list.put("id", rs.getInt("id"));
-            list.put("owner", rs.getShort("owner"));
+            list.put("owner", rs.getString("owner"));
             list.put("startx", rs.getInt("startx"));
             list.put("startz", rs.getInt("startz"));
             list.put("endx", rs.getInt("endx"));
             list.put("endz", rs.getInt("endz"));
-            list.put("world", rs.getShort("world"));
+            list.put("world", rs.getString("world"));
             return list;
         } catch (SQLException e) {
             System.err.println(e.getMessage());
@@ -70,12 +63,12 @@ public class SQLite3DataProvider {
         try {
             ResultSet rs = statement.executeQuery("select * from land where (id = "+ id +")");
             list.put("id", rs.getInt("id"));
-            list.put("owner", rs.getShort("owner"));
+            list.put("owner", rs.getString("owner"));
             list.put("startx", rs.getInt("startx"));
             list.put("startz", rs.getInt("startz"));
             list.put("endx", rs.getInt("endx"));
             list.put("endz", rs.getInt("endz"));
-            list.put("world", rs.getShort("world"));
+            list.put("world", rs.getString("world"));
             return list;
         } catch (SQLException e) {
             System.err.println(e.getMessage());
