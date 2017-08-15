@@ -1,6 +1,7 @@
 
 package net.comorevi.moneysland;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,15 +17,19 @@ import net.comorevi.moneyapi.MoneySAPI;
 public class MoneySLand extends PluginBase {
 
     private static final String UNIT = "MS";
-    private static final int landPrice = 100;
-    private MoneySAPI money;
+    private static int landPrice = 100;
+    private static int landSize = 500;
 
+    private MoneySAPI money;
     private SQLite3DataProvider sql;
     private static MoneySLand instance;
+
     private String messages[];
     private Config translateFile;
     private Map<String, Object> configData;
+    private Map<String, Object> pluginData;
     private Map<String, Integer[][]> setPos = new HashMap<String, Integer[][]>();
+    private Config conf;
 
 
     /**************/
@@ -106,6 +111,9 @@ public class MoneySLand extends PluginBase {
         this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
         this.getLogger().info(this.translateString("message-onEnable"));
 
+        this.initMessageConfig();
+        this.initMoneySLandConfig();
+
         try{
             this.money = (MoneySAPI) this.getServer().getPluginManager().getPlugin("MoneySAPI");
         }catch(Exception e){
@@ -113,8 +121,6 @@ public class MoneySLand extends PluginBase {
             this.getServer().getPluginManager().disablePlugin(this);
         }
 
-
-        this.initMessageConfig();
     }
 
     @Override
@@ -298,9 +304,26 @@ public class MoneySLand extends PluginBase {
     }
 
     private void initMessageConfig(){
-        this.translateFile = new Config();
+        this.translateFile = new Config(new File("./plugins/MoneySLand/Message.yml"), Config.YAML);
         this.translateFile.load(this.getClass().getClassLoader().getResourceAsStream("Message.yml"));
         this.configData = this.translateFile.getAll();
+        return;
+    }
+
+    public void initMoneySLandConfig(){
+        if(!new File("./plugins/MoneySLand/Config.yml").exists()){
+            this.conf = new Config(new File("./plugins/MoneySLand/Config.yml"), Config.YAML);
+            this.conf.set("landPrice", 100);
+            this.conf.set("landSize", 500);
+            this.conf.save();
+        }
+
+        this.conf.load(this.getClass().getClassLoader().getResourceAsStream("Config.yml"));
+        this.pluginData = this.conf.getAll();
+
+        landPrice = (int) pluginData.get("landPrice");
+        landSize = (int) pluginData.get("landSize");
+
         return;
     }
 
