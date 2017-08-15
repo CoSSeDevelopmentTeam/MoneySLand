@@ -1,7 +1,29 @@
+/**
+ * MoneySLand
+ *
+ *
+ * CosmoSunriseServerPluginEditorsTeam
+ *
+ * HP: http://info.comorevi.net
+ * GitHub: https://github.com/CosmoSunriseServerPluginEditorsTeam
+ *
+ *
+ * @author itsu
+ * @author popkechupki
+ *
+ *
+ * 機能版 アップデート履歴
+ *
+ * - 1.0
+ *    基本的な機能を追加。ほぼ動作するように。
+ */
 
 package net.comorevi.moneysland;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +34,7 @@ import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.level.Level;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.Utils;
 import net.comorevi.moneyapi.MoneySAPI;
 
 public class MoneySLand extends PluginBase {
@@ -26,8 +49,8 @@ public class MoneySLand extends PluginBase {
 
     private String messages[];
     private Config translateFile;
-    private Map<String, Object> configData;
-    private Map<String, Object> pluginData;
+    private Map<String, Object> configData = new HashMap<String, Object>();
+    private Map<String, Object> pluginData = new HashMap<String, Object>();
     private Map<String, Integer[][]> setPos = new HashMap<String, Integer[][]>();
     private Config conf;
 
@@ -94,7 +117,15 @@ public class MoneySLand extends PluginBase {
     /**************/
 
     public int calculateLandPrice(String name) {
-        return 0;
+        int start[] = new int[2];
+        int end[] = new int[2];
+
+        start[0] = Math.min(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
+        start[1] = Math.max(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
+        end[0] = Math.min(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
+        end[1] = Math.max(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
+
+        return (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * landPrice;
     }
 
     public boolean checkOverLap(int[] start, int[] end, String world) {
@@ -109,10 +140,11 @@ public class MoneySLand extends PluginBase {
     public void onEnable() {
         this.getDataFolder().mkdir();
         this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
-        this.getLogger().info(this.translateString("message-onEnable"));
 
         this.initMessageConfig();
         this.initMoneySLandConfig();
+
+        this.getLogger().info(this.translateString("message-onEnable"));
 
         try{
             this.money = (MoneySAPI) this.getServer().getPluginManager().getPlugin("MoneySAPI");
@@ -121,6 +153,7 @@ public class MoneySLand extends PluginBase {
             this.getServer().getPluginManager().disablePlugin(this);
         }
 
+        this.sql = new SQLite3DataProvider(this);
     }
 
     @Override
@@ -156,11 +189,27 @@ public class MoneySLand extends PluginBase {
                     int startX = (int)p.getX();
                     int startZ = (int)p.getZ();
 
+                    try{
+                        if(this.setPos.get(name) == null){
+                            this.setPos.put(name, new Integer[2][2]);
+                            this.setPos.get(name)[0][0] = 999999999;
+                            this.setPos.get(name)[0][1] = 999999999;
+                            this.setPos.get(name)[1][0] = 999999999;
+                            this.setPos.get(name)[1][1] = 999999999;
+                        }
+                    }catch(NullPointerException e){
+                        this.setPos.put(name, new Integer[2][2]);
+                        this.setPos.get(name)[0][0] = 999999999;
+                        this.setPos.get(name)[0][1] = 999999999;
+                        this.setPos.get(name)[1][0] = 999999999;
+                        this.setPos.get(name)[1][1] = 999999999;
+                    }
+
                     this.setPos.get(name)[0][0] = startX;
                     this.setPos.get(name)[0][1] = startZ;
                     p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(1), String.valueOf(startX), String.valueOf(startZ)));
 
-                    if(!(this.setPos.get(name).length == 0) && this.setPos.get(name).length >= 2){
+                    if(!(this.setPos.get(name)[0][0] == 999999999) && !(this.setPos.get(name)[0][1] == 999999999) && !(this.setPos.get(name)[1][0] == 999999999) && !(this.setPos.get(name)[1][1] == 999999999) && this.setPos.get(name).length >= 2){
                         int price = this.calculateLandPrice(name);
                         p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
                     }
@@ -170,11 +219,27 @@ public class MoneySLand extends PluginBase {
                     int endX = (int)p.getX();
                     int endZ = (int)p.getZ();
 
+                    try{
+                        if(this.setPos.get(name) == null){
+                            this.setPos.put(name, new Integer[2][2]);
+                            this.setPos.get(name)[0][0] = 999999999;
+                            this.setPos.get(name)[0][1] = 999999999;
+                            this.setPos.get(name)[1][0] = 999999999;
+                            this.setPos.get(name)[1][1] = 999999999;
+                        }
+                    }catch(NullPointerException e){
+                        this.setPos.put(name, new Integer[2][2]);
+                        this.setPos.get(name)[0][0] = 999999999;
+                        this.setPos.get(name)[0][1] = 999999999;
+                        this.setPos.get(name)[1][0] = 999999999;
+                        this.setPos.get(name)[1][1] = 999999999;
+                    }
+
                     this.setPos.get(name)[1][0] = endX;
                     this.setPos.get(name)[1][1] = endZ;
                     p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(2), String.valueOf(endX), String.valueOf(endZ)));
 
-                    if(!(this.setPos.get(name).length == 0) && this.setPos.get(name).length >= 2){
+                    if(!(this.setPos.get(name)[0][0] == 999999999) && !(this.setPos.get(name)[0][1] == 999999999) && !(this.setPos.get(name)[1][0] == 999999999) && !(this.setPos.get(name)[1][1] == 999999999) && this.setPos.get(name).length >= 2){
                         int price = this.calculateLandPrice(name);
                         p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
                     }
@@ -188,8 +253,8 @@ public class MoneySLand extends PluginBase {
 
                     String worldName = p.getLevel().getName();
 
-                    int[] start = new int[]{};
-                    int[] end = new int[]{};
+                    int[] start = new int[2];
+                    int[] end = new int[2];
 
                     start[0] = Math.min(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
                     start[1] = Math.max(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
@@ -205,6 +270,11 @@ public class MoneySLand extends PluginBase {
                             this.createLand(nameB, start, end, worldName);
                             p.sendMessage(TextValues.INFO + this.translateString("player-landBuy", String.valueOf(s), String.valueOf(price), UNIT));
                             this.money.grantMoney(p, price);
+
+                            this.setPos.get(name)[0][0] = 999999999;
+                            this.setPos.get(name)[0][1] = 999999999;
+                            this.setPos.get(name)[1][0] = 999999999;
+                            this.setPos.get(name)[1][1] = 999999999;
                             return true;
                         }else{
                             p.sendMessage(TextValues.ALERT + this.translateString("error-no-money"));
@@ -304,21 +374,44 @@ public class MoneySLand extends PluginBase {
     }
 
     private void initMessageConfig(){
+        if(!new File("./plugins/MoneySLand/Message.yml").exists()){
+            try {
+                FileWriter fw = new FileWriter(new File("./plugins/MoneySLand/Message.yml"), true);//trueで追加書き込み,falseで上書き
+                PrintWriter pw = new PrintWriter(fw);
+                pw.println("");
+                pw.close();
+                Utils.writeFile(new File("./plugins/MoneySLand/Message.yml"), this.getClass().getClassLoader().getResourceAsStream("Message.yml"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         this.translateFile = new Config(new File("./plugins/MoneySLand/Message.yml"), Config.YAML);
-        this.translateFile.load(this.getClass().getClassLoader().getResourceAsStream("Message.yml"));
+        this.translateFile.load("./plugins/MoneySLand/Message.yml");
         this.configData = this.translateFile.getAll();
         return;
     }
 
     public void initMoneySLandConfig(){
         if(!new File("./plugins/MoneySLand/Config.yml").exists()){
+            try {
+                FileWriter fw = new FileWriter(new File("./plugins/MoneySLand/Config.yml"), true);
+                PrintWriter pw = new PrintWriter(fw);
+                pw.println("");
+                pw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             this.conf = new Config(new File("./plugins/MoneySLand/Config.yml"), Config.YAML);
+            this.conf.load("./plugins/MoneySLand/Config.yml");
             this.conf.set("landPrice", 100);
             this.conf.set("landSize", 500);
             this.conf.save();
         }
 
-        this.conf.load(this.getClass().getClassLoader().getResourceAsStream("Config.yml"));
+        this.conf = new Config(new File("./plugins/MoneySLand/Config.yml"), Config.YAML);
+        this.conf.load("./plugins/MoneySLand/Config.yml");
         this.pluginData = this.conf.getAll();
 
         landPrice = (int) pluginData.get("landPrice");
@@ -328,11 +421,14 @@ public class MoneySLand extends PluginBase {
     }
 
     public String translateString(String key, String... args){
-        String src = (String) configData.get(key);
-        for(int i=0;i < args.length;i++){
-            src = src.replaceAll("{%" + i + "}", args[i]);
+        if(configData != null || !configData.isEmpty()){
+            String src = (String) configData.get(key);
+            for(int i=0;i < args.length;i++){
+                src = src.replace("{%" + i + "}", args[i]);
+            }
+            return src;
         }
-        return src;
+        return null;
     }
 
 }
