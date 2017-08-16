@@ -37,6 +37,8 @@
  *     ヘルプで::op, ::allタグ, ##コメントアウトが使えるように/SQL文の修正
  *   - 2.2
  *      OPコマンドの実装(/land set, /land deleteworldprotect, /land addworldprotect
+ *    - 2.3
+ *       /land sellの実装/致命的なバグの修正
  *
  */
 
@@ -110,8 +112,12 @@ public class MoneySLand extends PluginBase {
         return sql.existsLand(x, z, world);//(?)
     }
 
-    public void createLand(String owner, int[] start, int[] end, String world) {
-        sql.createLand(owner, start[0], start[1], end[0], end[1], world);
+    public void createLand(int id, String owner, int[] start, int[] end, int size, String world) {
+        sql.createLand(id, owner, start[0], start[1], end[0], end[1], size, world);
+    }
+
+    public int deleteLand(String name, int x, int z, String world){
+        return sql.deleteLand(name, x, z, world);
     }
 
     public boolean isWorldProtect(String world) {
@@ -328,9 +334,13 @@ public class MoneySLand extends PluginBase {
 
                         String nameB = p.getName().toLowerCase();
                         if(this.money.getMoney(p) >=price){
-                            this.createLand(nameB, start, end, worldName);
+                            int id = this.getConfig().getInt("landId");
+                            this.createLand(id, nameB, start, end, s, worldName);
+                            id++;
+                            this.getConfig().set("landId", id);
+                            this.getConfig().save();
                             p.sendMessage(TextValues.INFO + this.translateString("player-landBuy", String.valueOf(s), String.valueOf(price), UNIT));
-                            this.money.grantMoney(p, price);
+                            this.money.setMoney(p, this.money.getMoney(p) - price);
                             this.resetLandData(name);
                             return true;
                         }else{
@@ -343,7 +353,9 @@ public class MoneySLand extends PluginBase {
                     }
 
                 case "sell":
-                    sender.sendMessage("このコマンドはまだ実装されていません。");
+                    int money = this.deleteLand(name, (int) p.getX(), (int) p.getZ(), p.getLevel().getName()) / 2;
+                    this.money.addMoney(p, money);
+
                     return true;
 
                 case "invite":
@@ -435,7 +447,7 @@ public class MoneySLand extends PluginBase {
                             int landP;
 
                             try{
-                                landP = Integer.parseInt(args[3]);
+                                landP = Integer.parseInt(args[2]);
                             }catch(NumberFormatException e){
                                 p.sendMessage(TextValues.ALERT + this.translateString("error-command-message2", String.valueOf(3)));
                                 return true;
@@ -458,7 +470,7 @@ public class MoneySLand extends PluginBase {
                             int landS;
 
                             try{
-                                landS = Integer.parseInt(args[3]);
+                                landS = Integer.parseInt(args[2]);
                             }catch(NumberFormatException e){
                                 p.sendMessage(TextValues.ALERT + this.translateString("error-command-message2", String.valueOf(3)));
                                 return true;

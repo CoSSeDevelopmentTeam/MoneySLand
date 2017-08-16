@@ -47,38 +47,45 @@ public class SQLite3DataProvider {
             connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
             statement = connection.createStatement();
             statement.setQueryTimeout(30);
-            statement.executeUpdate("CREATE table if not exists land (id integer primary key autoincrement, owner text not null, startx integer not null, startz integer not null, endx integer not null, endz integer not null, world text not null)");
+            statement.executeUpdate("CREATE table if not exists land (id integer primary key autoincrement, owner text not null, startx integer not null, startz integer not null, endx integer not null, endz integer not null, size integer not null, world text not null)");
             statement.executeUpdate("CREATE table if not exists invite (id integer not null, name text not null)");
         } catch(SQLException e) {
             System.err.println(e.getMessage());
         }
     }
 
-    public void createLand(String owner, int startx, int startz, int endx, int endz, String world) {
+    public void createLand(int id, String owner, int startx, int startz, int endx, int endz, int size, String world) {
         try {
-        	int id = plugin.getConfig().getInt("landId");
-            statement.executeUpdate("INSERT INTO land VALUES(" + id + ", '"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", '"+ world +"')");
-            id++;
-            plugin.getConfig().set("landId", id);
-            plugin.getConfig().save();
+            statement.executeUpdate("INSERT INTO land VALUES(" + id + ", '"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')");
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
     }
 
-    public void deleteLand(String name, int x, int z, String world) {
+    public int deleteLand(String name, int x, int z, String world) {
         Map<String, Object> land = getLand(x, z, world);
-        int id = (int) land.get("id");
+        int id;
+        try{
+        	id = (int) land.get("id");
+        }catch(NullPointerException e){
+        	plugin.getServer().getPlayer(name).sendMessage(plugin.translateString("error-notFoundLand"));
+        	return 0;
+        }
         String owner = (String) land.get("owner");
+        int size;
         try {
             if(owner.equals(name)) {
+            	size = (int) land.get("size");
                 statement.executeUpdate("DELETE from land WHERE id = "+ id);
+                return size;
             } else {
-                //持ち主じゃないってメッセージ
+            	plugin.getServer().getPlayer(name).sendMessage(plugin.translateString("error-land-alreadyused"));
+            	return 0;
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
+        return 0;
     }
 
     public Map<String, Object> getLand(int x, int z, String world) {
@@ -91,6 +98,7 @@ public class SQLite3DataProvider {
             list.put("startz", rs.getInt("startz"));
             list.put("endx", rs.getInt("endx"));
             list.put("endz", rs.getInt("endz"));
+            list.put("size", rs.getInt("size"));
             list.put("world", rs.getString("world"));
             return list;
         } catch (SQLException e) {
@@ -134,7 +142,7 @@ public class SQLite3DataProvider {
     public boolean existsLand(int x, int z, String world) {
         Map<String, Object> list = new HashMap<String, Object>();
         try {
-            ResultSet rs = statement.executeQuery("SELECT count * from land WHERE (startx <= "+ x +" AND endx >= "+ x +") AND (startz <= "+ z +" AND endz >= "+ z +") AND world = '"+ world +"'");
+            ResultSet rs = statement.executeQuery("SELECT count * from land WHERE (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
             list.put("x", rs.getInt("x"));
             list.put("z", rs.getInt("z"));
             list.put("world", rs.getString("world"));

@@ -51,7 +51,7 @@ public class EventListener implements Listener {
     public void onEvent(Event event, Player player, Block block) {
         String world = player.getLevel().getName();
 
-        if(plugin.isEditable((int)block.x, (int)block.z, world, player)) {
+        if(!plugin.isEditable((int)block.x, (int)block.z, world, player)) {
             event.setCancelled();
             player.sendMessage(TextValues.ALERT + plugin.translateString("error-cannotChange"));
         }
