@@ -1,4 +1,11 @@
-﻿§aMoneySLand §fヘルプ
+﻿##MoneySAPI ヘルプファイル
+##
+##[使用方法]
+##"##"で始めるとコメントアウトとなります。
+##::opタグをつけるとそれ以降はopのみに送信されます。
+##::allタグをつけるとそれ以降は権限関係なく全員に送られます。
+##
+§aMoneySLand §fヘルプ
 §e/land start  §f土地の一つ目の角を設定します。
 §e/land end  §f土地の二つ目の角を設定します。
 §e/land buy  §f指定した土地を購入します。
@@ -6,8 +13,13 @@
 §e/land invite [ID] [プレイヤー名]  §fIDで指定した土地をプレイヤー名の人と共有します。
 §e/land info  §f今いる地点の土地の情報を見ます。
 §e/land help  §fこのヘルプを開きます。
+::op
+§e/land set [landprice/landsize]  §flandpriceで土地価格、landSizeで購入制限をそれぞれ設定します。
+§e/land deleteworldprotection [ワールド名]  §fワールド名で指定したワールドが編集禁止の場合、可能にします。
+§e/land addworldprotection [ワールド名]  §fワールド名で指定したワールドを編集禁止にします。
+::all
 §d開発 - CosmoSunriseServerPluginEditorsTeam
 §f[Java版]Itsu, popkechupki [PHP版]MasterF
 §fこのプラグインはMasterF氏開発のMyLandプラグインを開発者の承諾のもと、Javaに移植をしたものです。
 
-MoneySAPI Build2.0 Performing version
+MoneySAPI Build2.1 Performing version

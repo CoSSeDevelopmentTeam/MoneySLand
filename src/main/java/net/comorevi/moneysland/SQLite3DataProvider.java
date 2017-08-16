@@ -134,9 +134,9 @@ public class SQLite3DataProvider {
     public boolean existsLand(int x, int z, String world) {
         Map<String, Object> list = new HashMap<String, Object>();
         try {
-            ResultSet rs = statement.executeQuery("SELECT count * from land WHERE (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
+            ResultSet rs = statement.executeQuery("SELECT count * from land WHERE (startx <= "+ x +" AND endx >= "+ x +") AND (startz <= "+ z +" AND endz >= "+ z +") AND world = '"+ world +"'");
             list.put("x", rs.getInt("x"));
-            list.put("y", rs.getInt("y"));
+            list.put("z", rs.getInt("z"));
             list.put("world", rs.getString("world"));
 
             /*どっちかわからない。

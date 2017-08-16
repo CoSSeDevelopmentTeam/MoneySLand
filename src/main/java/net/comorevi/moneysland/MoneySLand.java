@@ -33,6 +33,8 @@
  *        土地制限の無制限(-1)に対応
  * - 2.0
  *    イベント関連の修正/コードの調整/ワールドプロテクトの実装/ヘルプの実装
+ *  - 2.1
+ *     ヘルプで::op, ::allタグ, ##コメントアウトが使えるように/SQL文の修正
  *
  */
 
@@ -70,7 +72,6 @@ public class MoneySLand extends PluginBase {
     private SQLite3DataProvider sql;
     private static MoneySLand instance;
 
-    private String messages[];
     private Config translateFile;
     private Map<String, Object> configData = new HashMap<String, Object>();
     private Map<String, Object> pluginData = new HashMap<String, Object>();
@@ -419,18 +420,37 @@ public class MoneySLand extends PluginBase {
     /****************/
 
     public void helpMessage(CommandSender sender){
-        try{
-            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("Help.txt"), "UTF-8"));
-            String txt;
-            while(true){
-                txt = br.readLine();
-                if(txt == null)break;
-                sender.sendMessage(txt);
-            }
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-        return;
+    	/*IO処理は重いので別スレッドで*/
+    	Thread th = new Thread(new Runnable(){
+			@Override
+			public void run() {
+		        try{
+		            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("Help.txt"), "UTF-8"));
+		            String txt;
+		            boolean op = (boolean) sender.isOp();
+		            boolean send = true;
+		            while(true){
+		                txt = br.readLine();
+		                if(txt == null)break;
+		                if(txt.startsWith("##"))continue;
+		                if(txt.equals("::op")){
+		                	send = false;
+		                	continue;
+		                }
+		                if(op)send = true;
+		                if(txt.equals("::all")){
+		                	send = true;
+		                	continue;
+		                }
+		                if(send) sender.sendMessage(txt);
+		            }
+		        }catch(IOException e){
+		            e.printStackTrace();
+		        }
+		        return;
+			}
+    	});
+    	th.start();
     }
 
     public String translateString(String key, String... args){
