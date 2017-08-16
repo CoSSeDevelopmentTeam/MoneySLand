@@ -41,6 +41,8 @@
  *       /land sellの実装/致命的なバグの修正
  *     - 2.4
  *        大幅なバグ修正/いろいろな実装(自分でもよくわからん)
+ *      - 2.5
+ *         バグ修正
  *
  */
 
@@ -365,8 +367,18 @@ public class MoneySLand extends PluginBase {
                     }
 
                 case "sell":
-                    int money = this.deleteLand(name, (int) p.getX(), (int) p.getZ(), p.getLevel().getName()) / 2;
+                    int landid = 0;
+
+                    try{
+                        landid = (int) this.getLand((int) p.getX(), (int) p.getZ(), p.getLevel().getName()).get("id");
+                    }catch(NullPointerException e){
+                        p.sendMessage(TextValues.ALERT + this.translateString("player-noSuchLandId"));
+                        return true;
+                    }
+
+                    int money = this.deleteLand(name, (int) p.getX(), (int) p.getZ(), p.getLevel().getName()) / 2 * 100;
                     this.money.addMoney(p, money);
+                    p.sendMessage(TextValues.INFO + this.translateString("player-sell", String.valueOf(money), UNIT, String.valueOf(landid)));
 
                     return true;
 

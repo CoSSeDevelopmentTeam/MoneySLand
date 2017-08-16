@@ -95,12 +95,12 @@ public class SQLite3DataProvider {
                 list.put("world", rs.getString("world"));
             }
             if(!list.isEmpty()){
-            	rs.close();
-            	return (list.size() > 0) ? list : null;
+                rs.close();
+                return (list.size() > 0) ? list : null;
             }else{
-            	list = new HashMap<String, Object>();
-            	ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and endx <= "+ x +") and (startz >= "+ z +" and endz <= "+ z +") and world = '"+ world +"'");
-            	//Mega //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and startz <= "+ z +") and (endx >= "+ x +" and endz >= "+ z +") and world = '"+ world +"'");
+                list = new HashMap<String, Object>();
+                ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and endx <= "+ x +") and (startz >= "+ z +" and endz <= "+ z +") and world = '"+ world +"'");
+                //Mega //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and startz <= "+ z +") and (endx >= "+ x +" and endz >= "+ z +") and world = '"+ world +"'");
                 while(rs1.next()) {
                     list.put("id", rs.getInt("id"));
                     list.put("owner", rs.getString("owner"));
@@ -174,11 +174,11 @@ public class SQLite3DataProvider {
                 list.put("world", rs.getString("world"));
             }
             if(!list.isEmpty()){
-            	return (int) list.get("id") > 0;
+                return (int) list.get("id") > 0;
             }else{
-            	list = new HashMap<String, Object>();
-            	ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and endx <= "+ x +") and (startz >= "+ z +" and endz <= "+ z +") and world = '"+ world +"'");
-            	//Mega //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and startz <= "+ z +") and (endx >= "+ x +" and endz >= "+ z +") and world = '"+ world +"'");
+                list = new HashMap<String, Object>();
+                ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and endx <= "+ x +") and (startz >= "+ z +" and endz <= "+ z +") and world = '"+ world +"'");
+                //Mega //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and startz <= "+ z +") and (endx >= "+ x +" and endz >= "+ z +") and world = '"+ world +"'");
                 while(rs1.next()) {
                     list.put("id", rs.getInt("id"));
                     list.put("owner", rs.getString("owner"));
