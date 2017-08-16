@@ -39,6 +39,8 @@
  *      OPコマンドの実装(/land set, /land deleteworldprotect, /land addworldprotect
  *    - 2.3
  *       /land sellの実装/致命的なバグの修正
+ *     - 2.4
+ *        大幅なバグ修正/いろいろな実装(自分でもよくわからん)
  *
  */
 
@@ -109,7 +111,7 @@ public class MoneySLand extends PluginBase {
     }
 
     public boolean existsLand(int x, int z, String world) {
-        return sql.existsLand(x, z, world);//(?)
+        return sql.existsLand(x, z, world);
     }
 
     public void createLand(int id, String owner, int[] start, int[] end, int size, String world) {
@@ -129,7 +131,7 @@ public class MoneySLand extends PluginBase {
         try{
             Map<String, Object> land = this.getSQL().getLand(x, z, world);
 
-            if(land == null || land.size() == 0){
+            if(land == null){
                 return !(this.isWorldProtect(world));
             }
 
@@ -174,6 +176,16 @@ public class MoneySLand extends PluginBase {
     }
 
     public boolean checkOverLap(int[] start, int[] end, String world) {
+        Map<String, Object> map;
+        for(int id : this.getSQL().getAllLands()){
+            if(this.sql.getLandById(id).get("world").equals(world)){
+                map = this.sql.getLandById(id);
+                if((int) map.get("startx") >= start[0] && (int) map.get("startz") >= start[1]
+                        && (int) map.get("endx") <= end[0] && (int) map.get("endz") <= end[1]){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -404,19 +416,23 @@ public class MoneySLand extends PluginBase {
                         int z = (int) p.getZ();
                         String world = level.getName();
                         int landId = -1;
+                        String owner = "";
+                        Map<String, Object> map = new HashMap<String, Object>();
 
                         if(this.existsLand(x, z, world)){
-                            landId = (int) this.getLand(x, z, world).get("id");
+                            map = this.getLand(x, z, world);
+                            landId = (int) map.get("id");
+                            owner = (String) map.get("owner");
                         }
 
                         if(landId == -1){
                             p.sendMessage(TextValues.INFO + this.translateString("player-noSuchLandId"));
                         }else{
-                            p.sendMessage(TextValues.INFO + this.translateString("player-landId", String.valueOf(landId)));
+                            p.sendMessage(TextValues.INFO + this.translateString("player-landId", String.valueOf(landId), owner));
                         }
                         return true;
                     }catch(NullPointerException e){
-                        p.sendMessage(TextValues.INFO + this.translateString("error-all"));
+                        p.sendMessage(TextValues.INFO + this.translateString("player-noSuchLandId"));
                         return true;
                     }
 
@@ -426,13 +442,13 @@ public class MoneySLand extends PluginBase {
 
                 case "set":
                     if(!p.isOp()){
-                        p.sendMessage(this.translateString("player-isNotOP"));
+                        p.sendMessage(TextValues.ALERT + this.translateString("player-isNotOP"));
                         return true;
                     }
 
                     try{if(args[1] != null){}}
                     catch(ArrayIndexOutOfBoundsException e){
-                        p.sendMessage(this.translateString(("error-command-message1")));
+                        p.sendMessage(TextValues.ALERT + this.translateString(("error-command-message1")));
                         return true;
                     }
 
@@ -440,7 +456,7 @@ public class MoneySLand extends PluginBase {
                         case "landPrice":
                             try{if(args[2] != null){}}
                             catch(ArrayIndexOutOfBoundsException e){
-                                p.sendMessage(this.translateString(("error-command-message1")));
+                                p.sendMessage(TextValues.ALERT + this.translateString(("error-command-message1")));
                                 return true;
                             }
 
@@ -449,7 +465,7 @@ public class MoneySLand extends PluginBase {
                             try{
                                 landP = Integer.parseInt(args[2]);
                             }catch(NumberFormatException e){
-                                p.sendMessage(TextValues.ALERT + this.translateString("error-command-message2", String.valueOf(3)));
+                                p.sendMessage(TextValues.ALERT + TextValues.ALERT + this.translateString("error-command-message2", String.valueOf(3)));
                                 return true;
                             }
 
@@ -463,7 +479,7 @@ public class MoneySLand extends PluginBase {
                         case "landSize":
                             try{if(args[2] != null){}}
                             catch(ArrayIndexOutOfBoundsException e){
-                                p.sendMessage(this.translateString(("error-command-message1")));
+                                p.sendMessage(TextValues.ALERT + this.translateString(("error-command-message1")));
                                 return true;
                             }
 
@@ -488,7 +504,7 @@ public class MoneySLand extends PluginBase {
                 case "deleteworldprotect":
                     try{if(args[1] != null){}}
                     catch(ArrayIndexOutOfBoundsException e){
-                        p.sendMessage(this.translateString(("error-command-message1")));
+                        p.sendMessage(TextValues.ALERT + this.translateString(("error-command-message1")));
                         return true;
                     }
 
@@ -502,12 +518,12 @@ public class MoneySLand extends PluginBase {
                 case "addworldprotect":
                     try{if(args[1] != null){}}
                     catch(ArrayIndexOutOfBoundsException e){
-                        p.sendMessage(this.translateString(("error-command-message1")));
+                        p.sendMessage(TextValues.ALERT + this.translateString(("error-command-message1")));
                         return true;
                     }
 
                     if(this.worldProtect.contains(args[1])){
-                        p.sendMessage(this.translateString("error-already-set"));
+                        p.sendMessage(TextValues.ALERT + this.translateString("error-already-set"));
                         return true;
                     }
 
@@ -563,7 +579,7 @@ public class MoneySLand extends PluginBase {
     public String translateString(String key, String... args){
         if(configData != null || !configData.isEmpty()){
             String src = (String) configData.get(key);
-            if(src == null || src.equals("")) return (String) configData.get("error-notFoundKey");
+            if(src == null || src.equals("")) return TextValues.ALERT + (String) configData.get("error-notFoundKey");
             for(int i=0;i < args.length;i++){
                 src = src.replace("{%" + i + "}", args[i]);
             }
