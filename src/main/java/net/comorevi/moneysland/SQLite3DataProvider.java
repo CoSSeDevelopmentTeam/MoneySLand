@@ -44,7 +44,7 @@ public class SQLite3DataProvider {
         }
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + "/DataDB.db");
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
             statement = connection.createStatement();
             statement.setQueryTimeout(30);
             statement.executeUpdate("CREATE table if not exists land (id integer primary key autoincrement, owner text not null, startx integer not null, startz integer not null, endx integer not null, endz integer not null, world text not null)");
@@ -56,7 +56,11 @@ public class SQLite3DataProvider {
 
     public void createLand(String owner, int startx, int startz, int endx, int endz, String world) {
         try {
-            statement.executeUpdate("INSERT INTO land VALUES('"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", '"+ world +"')");
+        	int id = plugin.getConfig().getInt("landId");
+            statement.executeUpdate("INSERT INTO land VALUES(" + id + ", '"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", '"+ world +"')");
+            id++;
+            plugin.getConfig().set("landId", id);
+            plugin.getConfig().save();
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }

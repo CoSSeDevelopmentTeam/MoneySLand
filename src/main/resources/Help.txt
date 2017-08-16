@@ -2,10 +2,12 @@
 §e/land start  §f土地の一つ目の角を設定します。
 §e/land end  §f土地の二つ目の角を設定します。
 §e/land buy  §f指定した土地を購入します。
-§e/land sell [ID]  §fIDで指定した土地を売却します。土地購入時に払った金額の半分が戻ってきます。
+§e/land sell [ID]  §fIDで指定した土地を売却します。土地購入時に払った金額の半分が戻ってきます。(未実装)
 §e/land invite [ID] [プレイヤー名]  §fIDで指定した土地をプレイヤー名の人と共有します。
 §e/land info  §f今いる地点の土地の情報を見ます。
-§e/land hekp  §fこのヘルプを開きます。
+§e/land help  §fこのヘルプを開きます。
 §d開発 - CosmoSunriseServerPluginEditorsTeam
 §f[Java版]Itsu, popkechupki [PHP版]MasterF
 §fこのプラグインはMasterF氏開発のMyLandプラグインを開発者の承諾のもと、Javaに移植をしたものです。
+
+MoneySAPI Build2.0 Performing version

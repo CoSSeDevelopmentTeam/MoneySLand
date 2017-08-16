@@ -64,6 +64,7 @@ public class MoneySLand extends PluginBase {
     private static final String UNIT = "MS";
     private static int landPrice = 100;
     private static int landSize = 500;
+    private static int landId;
 
     private MoneySAPI money;
     private SQLite3DataProvider sql;
@@ -88,6 +89,10 @@ public class MoneySLand extends PluginBase {
 
     public SQLite3DataProvider getSQL() {
         return this.sql;
+    }
+
+    public Config getConfig(){
+        return this.conf;
     }
 
     /**************/
@@ -295,7 +300,12 @@ public class MoneySLand extends PluginBase {
                     return true;
 
                 case "buy":
-                    if(this.setPos.get(name).length == 0 || this.setPos.get(name).length < 2){
+                    try{
+                        if(this.setPos.get(name).length == 0 || this.setPos.get(name).length < 2){
+                            p.sendMessage(TextValues.ALERT + this.translateString("error-not-selected"));
+                            return true;
+                        }
+                    }catch(NullPointerException e){
                         p.sendMessage(TextValues.ALERT + this.translateString("error-not-selected"));
                         return true;
                     }
@@ -478,6 +488,7 @@ public class MoneySLand extends PluginBase {
             this.conf.set("landPrice", 100);
             this.conf.set("landSize", -1);
             this.conf.set("worldProtect", new ArrayList<String>());
+            this.conf.set("landId", 0);
             this.conf.save();
         }
 
@@ -488,6 +499,7 @@ public class MoneySLand extends PluginBase {
         /*コンフィグからデータを取得*/
         landPrice = (int) pluginData.get("landPrice");
         landSize = (int) pluginData.get("landSize");
+        landId = (int) pluginData.get("landId");
         this.worldProtect = conf.getStringList("worldProtect");
 
         return;
