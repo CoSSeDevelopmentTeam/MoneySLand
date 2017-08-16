@@ -29,6 +29,8 @@
  *      購入可能土地サイズの制限に対応。
  *    - 1.3
  *       細かな調整/エラー回避
+ *     - 1.4
+ *        土地制限の無制限(-1)に対応
  *
  */
 
@@ -171,7 +173,11 @@ public class MoneySLand extends PluginBase {
         this.initMoneySLandConfig();
 
         this.getLogger().info(this.translateString("message-onEnable"));
-        this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, String.valueOf(landSize)));
+        if(landSize == -1){
+            this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, "無制限"));
+        }else{
+            this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, String.valueOf(landSize)));
+        }
 
         try{
             this.money = (MoneySAPI) this.getServer().getPluginManager().getPlugin("MoneySAPI");
@@ -238,9 +244,15 @@ public class MoneySLand extends PluginBase {
 
                     if(!(this.setPos.get(name)[0][0] == 999999999) && !(this.setPos.get(name)[0][1] == 999999999) && !(this.setPos.get(name)[1][0] == 999999999) && !(this.setPos.get(name)[1][1] == 999999999) && this.setPos.get(name).length >= 2){
                         int size = this.calculateLandSize(name);
-                        if(size > landSize){
-                            p.sendMessage(TextValues.ALERT + this.translateString("error-landSizeLimitOver", String.valueOf(size), String.valueOf(landSize)));
-                            return true;
+                        if(!(landSize == -1)){
+                            if(size > landSize){
+                                p.sendMessage(TextValues.ALERT + this.translateString("error-landSizeLimitOver", String.valueOf(size), String.valueOf(landSize)));
+                                return true;
+                            }else{
+                                int price = this.calculateLandPrice(name);
+                                p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
+                                return true;
+                            }
                         }else{
                             int price = this.calculateLandPrice(name);
                             p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
@@ -274,9 +286,15 @@ public class MoneySLand extends PluginBase {
 
                     if(!(this.setPos.get(name)[0][0] == 999999999) && !(this.setPos.get(name)[0][1] == 999999999) && !(this.setPos.get(name)[1][0] == 999999999) && !(this.setPos.get(name)[1][1] == 999999999) && this.setPos.get(name).length >= 2){
                         int size = this.calculateLandSize(name);
-                        if(size > landSize){
-                            p.sendMessage(TextValues.ALERT + this.translateString("error-landSizeLimitOver", String.valueOf(size), String.valueOf(landSize)));
-                            return true;
+                        if(!(landSize == -1)){
+                            if(size > landSize){
+                                p.sendMessage(TextValues.ALERT + this.translateString("error-landSizeLimitOver", String.valueOf(size), String.valueOf(landSize)));
+                                return true;
+                            }else{
+                                int price = this.calculateLandPrice(name);
+                                p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
+                                return true;
+                            }
                         }else{
                             int price = this.calculateLandPrice(name);
                             p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
