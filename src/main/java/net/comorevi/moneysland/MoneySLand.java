@@ -8,7 +8,7 @@
  * GitHub: https://github.com/CosmoSunriseServerPluginEditorsTeam
  *
  *
- * このプラグインはMasterF氏開発のMyLandプラグインを開発者の承認を得てJavaに移植をしたものです。
+ * このプラグインはMasterF氏開発のMyLandプラグインを開発者の承諾のもと、Javaに移植をしたものです。
  *
  *
  * [Java版]
@@ -31,6 +31,8 @@
  *       細かな調整/エラー回避
  *     - 1.4
  *        土地制限の無制限(-1)に対応
+ *      - 1.5
+ *         イベント関連の修正/コードの調整/ワールドプロテクトの実装
  *
  */
 
@@ -40,7 +42,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cn.nukkit.Player;
@@ -68,6 +72,7 @@ public class MoneySLand extends PluginBase {
     private Map<String, Object> configData = new HashMap<String, Object>();
     private Map<String, Object> pluginData = new HashMap<String, Object>();
     private Map<String, Integer[][]> setPos = new HashMap<String, Integer[][]>();
+    private List<String> worldProtect = new ArrayList<String>();
     private Config conf;
 
 
@@ -100,11 +105,7 @@ public class MoneySLand extends PluginBase {
     }
 
     public boolean isWorldProtect(String world) {
-        return false;
-    }
-
-    public boolean isWorldProtect(){
-        return false;
+        return this.worldProtect.contains(world);
     }
 
     public boolean isEditable(int x, int z, String world, Player player){
@@ -112,8 +113,9 @@ public class MoneySLand extends PluginBase {
         try{
             Map<String, Object> land = this.getSQL().getLand(x, z, world);
             int landId = (int)land.get("id");
+            
             if(landId == 0){
-                return !(this.isWorldProtect());
+                return !(this.isWorldProtect(world));
             }
 
             String name = player.getName().toLowerCase();
@@ -176,7 +178,7 @@ public class MoneySLand extends PluginBase {
         if(landSize == -1){
             this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, "無制限"));
         }else{
-            this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, String.valueOf(landSize)));
+            this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, String.valueOf(landSize) + "ブロック"));
         }
 
         try{
@@ -225,17 +227,11 @@ public class MoneySLand extends PluginBase {
                     try{
                         if(this.setPos.get(name) == null){
                             this.setPos.put(name, new Integer[2][2]);
-                            this.setPos.get(name)[0][0] = 999999999;
-                            this.setPos.get(name)[0][1] = 999999999;
-                            this.setPos.get(name)[1][0] = 999999999;
-                            this.setPos.get(name)[1][1] = 999999999;
+                            this.resetLandData(name);
                         }
                     }catch(NullPointerException e){
                         this.setPos.put(name, new Integer[2][2]);
-                        this.setPos.get(name)[0][0] = 999999999;
-                        this.setPos.get(name)[0][1] = 999999999;
-                        this.setPos.get(name)[1][0] = 999999999;
-                        this.setPos.get(name)[1][1] = 999999999;
+                        this.resetLandData(name);
                     }
 
                     this.setPos.get(name)[0][0] = startX;
@@ -267,17 +263,11 @@ public class MoneySLand extends PluginBase {
                     try{
                         if(this.setPos.get(name) == null){
                             this.setPos.put(name, new Integer[2][2]);
-                            this.setPos.get(name)[0][0] = 999999999;
-                            this.setPos.get(name)[0][1] = 999999999;
-                            this.setPos.get(name)[1][0] = 999999999;
-                            this.setPos.get(name)[1][1] = 999999999;
+                            this.resetLandData(name);
                         }
                     }catch(NullPointerException e){
                         this.setPos.put(name, new Integer[2][2]);
-                        this.setPos.get(name)[0][0] = 999999999;
-                        this.setPos.get(name)[0][1] = 999999999;
-                        this.setPos.get(name)[1][0] = 999999999;
-                        this.setPos.get(name)[1][1] = 999999999;
+                        this.resetLandData(name);
                     }
 
                     this.setPos.get(name)[1][0] = endX;
@@ -327,11 +317,7 @@ public class MoneySLand extends PluginBase {
                             this.createLand(nameB, start, end, worldName);
                             p.sendMessage(TextValues.INFO + this.translateString("player-landBuy", String.valueOf(s), String.valueOf(price), UNIT));
                             this.money.grantMoney(p, price);
-
-                            this.setPos.get(name)[0][0] = 999999999;
-                            this.setPos.get(name)[0][1] = 999999999;
-                            this.setPos.get(name)[1][0] = 999999999;
-                            this.setPos.get(name)[1][1] = 999999999;
+                            this.resetLandData(name);
                             return true;
                         }else{
                             p.sendMessage(TextValues.ALERT + this.translateString("error-no-money"));
@@ -371,15 +357,15 @@ public class MoneySLand extends PluginBase {
                                     this.getServer().getPlayer(guest).sendMessage(TextValues.INFO + this.translateString("player-landInvited", name, guest));
                                 }
                             }else{
-                                p.sendMessage(TextValues.ALERT + this.translateString("error-invite"));
+                                p.sendMessage(TextValues.ALERT + this.translateString("error-landInvite"));
                                 return true;
                             }
                         }else{
-                            p.sendMessage(TextValues.ALERT + this.translateString("error-invite"));
+                            p.sendMessage(TextValues.ALERT + this.translateString("error-landInvite"));
                             return true;
                         }
                     }else{
-                        p.sendMessage(TextValues.ALERT + this.translateString("error-all"));
+                        p.sendMessage(TextValues.ALERT + this.translateString(("error-notFoundLandKey"), String.valueOf(id)));
                         return true;
                     }
                     return true;
@@ -465,7 +451,7 @@ public class MoneySLand extends PluginBase {
         return;
     }
 
-    public void initMoneySLandConfig(){
+    private void initMoneySLandConfig(){
         if(!new File("./plugins/MoneySLand/Config.yml").exists()){
             try {
                 FileWriter fw = new FileWriter(new File("./plugins/MoneySLand/Config.yml"), true);
@@ -479,7 +465,8 @@ public class MoneySLand extends PluginBase {
             this.conf = new Config(new File("./plugins/MoneySLand/Config.yml"), Config.YAML);
             this.conf.load("./plugins/MoneySLand/Config.yml");
             this.conf.set("landPrice", 100);
-            this.conf.set("landSize", 500);
+            this.conf.set("landSize", -1);
+            this.conf.set("worldProtect", new ArrayList<String>());
             this.conf.save();
         }
 
@@ -489,7 +476,16 @@ public class MoneySLand extends PluginBase {
 
         landPrice = (int) pluginData.get("landPrice");
         landSize = (int) pluginData.get("landSize");
+        this.worldProtect = conf.getStringList("worldProtect");
 
+        return;
+    }
+    
+    private void resetLandData(String name){
+        this.setPos.get(name)[0][0] = 999999999;
+        this.setPos.get(name)[0][1] = 999999999;
+        this.setPos.get(name)[1][0] = 999999999;
+        this.setPos.get(name)[1][1] = 999999999;
         return;
     }
 

@@ -1,13 +1,11 @@
 package net.comorevi.moneysland;
 
-import cn.nukkit.IPlayer;
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
-import cn.nukkit.event.block.BlockEvent;
 import cn.nukkit.event.block.BlockPlaceEvent;
 
 public class EventListener implements Listener {
@@ -20,22 +18,20 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        onEvent(event);
+        onEvent(event, event.getPlayer(), event.getBlock());
     }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
-        onEvent(event);
+        onEvent(event, event.getPlayer(), event.getBlock());
     }
 
-    public void onEvent(Event event) {
-        Player player = ((IPlayer) event).getPlayer();
-        Block block = ((BlockEvent) event).getBlock();
-        String world = player.getLevel().getFolderName();
+    public void onEvent(Event event, Player player, Block block) {
+        String world = player.getLevel().getName();
 
         if(plugin.isEditable((int)block.x, (int)block.z, world, player)) {
             event.setCancelled();
-            player.sendMessage("MoneySLand>>cancelled.");
+            player.sendMessage(TextValues.ALERT + plugin.translateString("error-cannotChange"));
         }
 
     }

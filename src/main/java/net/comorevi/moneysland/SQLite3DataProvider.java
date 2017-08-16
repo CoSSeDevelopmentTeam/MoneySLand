@@ -25,8 +25,8 @@ public class SQLite3DataProvider {
             connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + "/DataDB.db");
             statement = connection.createStatement();
             statement.setQueryTimeout(30);
-            statement.executeUpdate("create table if not exists land (id integer primary key autoincrement, owner text not null, startx integer not null, startz integer not null, endx integer not null, endz integer not null, world text not null)");
-            statement.executeUpdate("create table if not exists invite (id integer not null, name text not null)");
+            statement.executeUpdate("CREATE table if not exists land (id integer primary key autoincrement, owner text not null, startx integer not null, startz integer not null, endx integer not null, endz integer not null, world text not null)");
+            statement.executeUpdate("CREATE table if not exists invite (id integer not null, name text not null)");
         } catch(SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -34,31 +34,31 @@ public class SQLite3DataProvider {
 
     public void createLand(String owner, int startx, int startz, int endx, int endz, String world) {
         try {
-            statement.executeUpdate("insert into land values('"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", '"+ world +"')");
+            statement.executeUpdate("INSERT INTO land VALUES('"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", '"+ world +"')");
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
     }
-    
+
     public void deleteLand(String name, int x, int z, String world) {
-    	Map<String, Object> land = getLand(x, z, world);
-    	int id = (int) land.get("id");
-    	String owner = (String) land.get("owner");
-    	try {
-    		if(owner.equals(name)) {
-    			statement.executeUpdate("delete from land where id = "+ id);
-    		} else {
-    			//持ち主じゃないってメッセージ
-    		}
-		} catch (SQLException e) {
-			System.err.println(e.getMessage());
-		}
+        Map<String, Object> land = getLand(x, z, world);
+        int id = (int) land.get("id");
+        String owner = (String) land.get("owner");
+        try {
+            if(owner.equals(name)) {
+                statement.executeUpdate("DELETE from land WHERE id = "+ id);
+            } else {
+                //持ち主じゃないってメッセージ
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     public Map<String, Object> getLand(int x, int z, String world) {
         Map<String, Object> list = new HashMap<String, Object>();
         try {
-            ResultSet rs = statement.executeQuery("select * from land where (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
+            ResultSet rs = statement.executeQuery("SELECT * from land WHERE (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
             list.put("id", rs.getInt("id"));
             list.put("owner", rs.getString("owner"));
             list.put("startx", rs.getInt("startx"));
@@ -76,7 +76,7 @@ public class SQLite3DataProvider {
     public Map<String, Object> getLandById(int id) {
         Map<String, Object> list = new HashMap<String, Object>();
         try {
-            ResultSet rs = statement.executeQuery("select * from land where (id = "+ id +")");
+            ResultSet rs = statement.executeQuery("SELECT * from land WHERE (id = "+ id +")");
             list.put("id", rs.getInt("id"));
             list.put("owner", rs.getString("owner"));
             list.put("startx", rs.getInt("startx"));
@@ -93,7 +93,7 @@ public class SQLite3DataProvider {
 
     public int getAllLands() {
         try {
-            ResultSet rs = statement.executeQuery("select * from land");
+            ResultSet rs = statement.executeQuery("SELECT * from land");
             for(int i=0;i < rs.getFetchSize();i++){
                 if(!(rs.getBoolean(i)) && (rs.getString("world") != null)) {
                     return rs.getInt("id");
@@ -108,7 +108,7 @@ public class SQLite3DataProvider {
     public boolean existsLand(int x, int z, String world) {
         Map<String, Object> list = new HashMap<String, Object>();
         try {
-            ResultSet rs = statement.executeQuery("select count * from land where (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
+            ResultSet rs = statement.executeQuery("SELECT count * from land WHERE (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
             list.put("x", rs.getInt("x"));
             list.put("y", rs.getInt("y"));
             list.put("world", rs.getString("world"));
@@ -131,7 +131,7 @@ public class SQLite3DataProvider {
         if(land == null)return;
 
         try {
-            statement.executeUpdate("insert into invite values("+ id +", '"+ name +"'");
+            statement.executeUpdate("INSERT INTO invite VALUES("+ id +", '"+ name +"'");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -141,7 +141,7 @@ public class SQLite3DataProvider {
     public boolean existsGuest(int id, String name) {
         Map<String, Object> list = new HashMap<String, Object>();
         try {
-            ResultSet rs = statement.executeQuery("select count * from invite where id = " + id + "and name = " + name);
+            ResultSet rs = statement.executeQuery("SELECT count * from invite WHERE id = " + id + "and name = " + name);
             list.put("id", rs.getInt("id"));
             list.put("name", rs.getString("name"));
         } catch (SQLException e) {
