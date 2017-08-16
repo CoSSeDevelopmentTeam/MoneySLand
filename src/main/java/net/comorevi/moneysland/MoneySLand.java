@@ -31,16 +31,18 @@
  *       細かな調整/エラー回避
  *     - 1.4
  *        土地制限の無制限(-1)に対応
- *      - 1.5
- *         イベント関連の修正/コードの調整/ワールドプロテクトの実装
+ * - 2.0
+ *    イベント関連の修正/コードの調整/ワールドプロテクトの実装/ヘルプの実装
  *
  */
 
 package net.comorevi.moneysland;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,7 +99,7 @@ public class MoneySLand extends PluginBase {
     }
 
     public boolean existsLand(int x, int z, String world) {
-        return false;//sql.existsLand(x, z, world);
+        return sql.existsLand(x, z, world);//(?)
     }
 
     public void createLand(String owner, int[] start, int[] end, String world) {
@@ -113,7 +115,7 @@ public class MoneySLand extends PluginBase {
         try{
             Map<String, Object> land = this.getSQL().getLand(x, z, world);
             int landId = (int)land.get("id");
-            
+
             if(landId == 0){
                 return !(this.isWorldProtect(world));
             }
@@ -329,6 +331,7 @@ public class MoneySLand extends PluginBase {
                     }
 
                 case "sell":
+                    sender.sendMessage("このコマンドはまだ実装されていません。");
                     return true;
 
                 case "invite":
@@ -406,10 +409,18 @@ public class MoneySLand extends PluginBase {
     /****************/
 
     public void helpMessage(CommandSender sender){
-        //適宜書いておいてください。
-        //getMessage()は使用しなくても大丈夫だと思ったので。
-        sender.sendMessage(TextValues.HELP);
-        sender.sendMessage("/land <start | end | buy | sell | invite | info>");
+        try{
+            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("Help.txt"), "UTF-8"));
+            String txt;
+            while(true){
+                txt = br.readLine();
+                if(txt == null)break;
+                sender.sendMessage(txt);
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        return;
     }
 
     public String translateString(String key, String... args){
@@ -474,14 +485,16 @@ public class MoneySLand extends PluginBase {
         this.conf.load("./plugins/MoneySLand/Config.yml");
         this.pluginData = this.conf.getAll();
 
+        /*コンフィグからデータを取得*/
         landPrice = (int) pluginData.get("landPrice");
         landSize = (int) pluginData.get("landSize");
         this.worldProtect = conf.getStringList("worldProtect");
 
         return;
     }
-    
+
     private void resetLandData(String name){
+        /*マイクラにはない座標(999999999)を代入しておくことでコマンドが実行されたか判定*/
         this.setPos.get(name)[0][0] = 999999999;
         this.setPos.get(name)[0][1] = 999999999;
         this.setPos.get(name)[1][0] = 999999999;

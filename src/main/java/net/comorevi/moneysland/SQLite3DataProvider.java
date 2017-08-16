@@ -1,3 +1,25 @@
+/**
+ * MoneySLand
+ *
+ *
+ * CosmoSunriseServerPluginEditorsTeam
+ *
+ * HP: http://info.comorevi.net
+ * GitHub: https://github.com/CosmoSunriseServerPluginEditorsTeam
+ *
+ *
+ * このプラグインはMasterF氏開発のMyLandプラグインを開発者の承諾のもと、Javaに移植をしたものです。
+ *
+ *
+ * [Java版]
+ * @author itsu
+ * @author popkechupki
+ *
+ * [PHP版]
+ * @author MasterF
+ *
+ */
+
 package net.comorevi.moneysland;
 
 import java.sql.Connection;
