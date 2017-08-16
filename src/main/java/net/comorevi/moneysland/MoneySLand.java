@@ -35,6 +35,8 @@
  *    イベント関連の修正/コードの調整/ワールドプロテクトの実装/ヘルプの実装
  *  - 2.1
  *     ヘルプで::op, ::allタグ, ##コメントアウトが使えるように/SQL文の修正
+ *   - 2.2
+ *      OPコマンドの実装(/land set, /land deleteworldprotect, /land addworldprotect
  *
  */
 
@@ -120,9 +122,8 @@ public class MoneySLand extends PluginBase {
         if(player.isOp())return true;
         try{
             Map<String, Object> land = this.getSQL().getLand(x, z, world);
-            int landId = (int)land.get("id");
 
-            if(landId == 0){
+            if(land == null || land.size() == 0){
                 return !(this.isWorldProtect(world));
             }
 
@@ -356,7 +357,7 @@ public class MoneySLand extends PluginBase {
                     try{
                         id = Integer.parseInt(args[1]);
                     }catch(NumberFormatException e){
-                        p.sendMessage(TextValues.ALERT + this.translateString("error-command-message2"));
+                        p.sendMessage(TextValues.ALERT + this.translateString(("error-command-message"), String.valueOf(2)));
                         return true;
                     }
 
@@ -387,13 +388,13 @@ public class MoneySLand extends PluginBase {
                 case "info":
                     try{
                         Level level = p.getLevel();
-                        int x = (int)p.getX();
-                        int z = (int)p.getZ();
+                        int x = (int) p.getX();
+                        int z = (int) p.getZ();
                         String world = level.getName();
                         int landId = -1;
 
                         if(this.existsLand(x, z, world)){
-                            landId = (int)this.getLand(x, z, world).get("id");
+                            landId = (int) this.getLand(x, z, world).get("id");
                         }
 
                         if(landId == -1){
@@ -410,6 +411,100 @@ public class MoneySLand extends PluginBase {
                 case "help":
                     this.helpMessage(sender);
                     return true;
+
+                case "set":
+                    if(!p.isOp()){
+                        p.sendMessage(this.translateString("player-isNotOP"));
+                        return true;
+                    }
+
+                    try{if(args[1] != null){}}
+                    catch(ArrayIndexOutOfBoundsException e){
+                        p.sendMessage(this.translateString(("error-command-message1")));
+                        return true;
+                    }
+
+                    switch(args[1]){
+                        case "landPrice":
+                            try{if(args[2] != null){}}
+                            catch(ArrayIndexOutOfBoundsException e){
+                                p.sendMessage(this.translateString(("error-command-message1")));
+                                return true;
+                            }
+
+                            int landP;
+
+                            try{
+                                landP = Integer.parseInt(args[3]);
+                            }catch(NumberFormatException e){
+                                p.sendMessage(TextValues.ALERT + this.translateString("error-command-message2", String.valueOf(3)));
+                                return true;
+                            }
+
+                            landPrice = landP;
+
+                            this.getConfig().set("landPrice", landPrice);
+                            this.getConfig().save();
+
+                            return true;
+
+                        case "landSize":
+                            try{if(args[2] != null){}}
+                            catch(ArrayIndexOutOfBoundsException e){
+                                p.sendMessage(this.translateString(("error-command-message1")));
+                                return true;
+                            }
+
+                            int landS;
+
+                            try{
+                                landS = Integer.parseInt(args[3]);
+                            }catch(NumberFormatException e){
+                                p.sendMessage(TextValues.ALERT + this.translateString("error-command-message2", String.valueOf(3)));
+                                return true;
+                            }
+
+                            landSize = landS;
+
+                            this.getConfig().set("landSize", landSize);
+                            this.getConfig().save();
+
+                            return true;
+                    }
+                    return true;
+
+                case "deleteworldprotect":
+                    try{if(args[1] != null){}}
+                    catch(ArrayIndexOutOfBoundsException e){
+                        p.sendMessage(this.translateString(("error-command-message1")));
+                        return true;
+                    }
+
+                    this.worldProtect.remove(args[1]);
+
+                    this.getConfig().set("worldProtect", this.worldProtect);
+                    this.getConfig().save();
+
+                    return true;
+
+                case "addworldprotect":
+                    try{if(args[1] != null){}}
+                    catch(ArrayIndexOutOfBoundsException e){
+                        p.sendMessage(this.translateString(("error-command-message1")));
+                        return true;
+                    }
+
+                    if(this.worldProtect.contains(args[1])){
+                        p.sendMessage(this.translateString("error-already-set"));
+                        return true;
+                    }
+
+                    this.worldProtect.add(args[1]);
+
+                    this.getConfig().set("worldProtect", this.worldProtect);
+                    this.getConfig().save();
+
+                    return true;
             }
         }
         return false;
@@ -420,37 +515,37 @@ public class MoneySLand extends PluginBase {
     /****************/
 
     public void helpMessage(CommandSender sender){
-    	/*IO処理は重いので別スレッドで*/
-    	Thread th = new Thread(new Runnable(){
-			@Override
-			public void run() {
-		        try{
-		            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("Help.txt"), "UTF-8"));
-		            String txt;
-		            boolean op = (boolean) sender.isOp();
-		            boolean send = true;
-		            while(true){
-		                txt = br.readLine();
-		                if(txt == null)break;
-		                if(txt.startsWith("##"))continue;
-		                if(txt.equals("::op")){
-		                	send = false;
-		                	continue;
-		                }
-		                if(op)send = true;
-		                if(txt.equals("::all")){
-		                	send = true;
-		                	continue;
-		                }
-		                if(send) sender.sendMessage(txt);
-		            }
-		        }catch(IOException e){
-		            e.printStackTrace();
-		        }
-		        return;
-			}
-    	});
-    	th.start();
+        /*IO処理は重いので別スレッドで*/
+        Thread th = new Thread(new Runnable(){
+            @Override
+            public void run() {
+                try{
+                    BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("Help.txt"), "UTF-8"));
+                    String txt;
+                    boolean op = (boolean) sender.isOp();
+                    boolean send = true;
+                    while(true){
+                        txt = br.readLine();
+                        if(txt == null)break;
+                        if(txt.startsWith("##"))continue;
+                        if(txt.equals("::op")){
+                            send = false;
+                            continue;
+                        }
+                        if(op)send = true;
+                        if(txt.equals("::all")){
+                            send = true;
+                            continue;
+                        }
+                        if(send) sender.sendMessage(txt);
+                    }
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+                return;
+            }
+        });
+        th.start();
     }
 
     public String translateString(String key, String... args){

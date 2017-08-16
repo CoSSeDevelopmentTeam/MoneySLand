@@ -15,8 +15,8 @@
 §e/land help  §fこのヘルプを開きます。
 ::op
 §e/land set [landprice/landsize]  §flandpriceで土地価格、landSizeで購入制限をそれぞれ設定します。
-§e/land deleteworldprotection [ワールド名]  §fワールド名で指定したワールドが編集禁止の場合、可能にします。
-§e/land addworldprotection [ワールド名]  §fワールド名で指定したワールドを編集禁止にします。
+§e/land deleteworldprotect [ワールド名]  §fワールド名で指定したワールドが編集禁止の場合、可能にします。
+§e/land addworldprotect [ワールド名]  §fワールド名で指定したワールドを編集禁止にします。
 ::all
 §d開発 - CosmoSunriseServerPluginEditorsTeam
 §f[Java版]Itsu, popkechupki [PHP版]MasterF
