@@ -50,6 +50,7 @@ package net.comorevi.moneysland;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -85,6 +86,7 @@ public class MoneySLand extends PluginBase {
     private Map<String, Object> pluginData = new HashMap<String, Object>();
     private Map<String, Integer[][]> setPos = new HashMap<String, Integer[][]>();
     private List<String> worldProtect = new ArrayList<String>();
+    private List<String> help = new ArrayList<String>();
     private Config conf;
 
 
@@ -202,6 +204,7 @@ public class MoneySLand extends PluginBase {
 
         this.initMessageConfig();
         this.initMoneySLandConfig();
+        this.initHelpFile();
 
         this.getLogger().info(this.translateString("message-onEnable"));
         if(landSize == -1){
@@ -367,10 +370,24 @@ public class MoneySLand extends PluginBase {
                     }
 
                 case "sell":
-                    int landid = 0;
+                	try{if(args[1] != null){}}
+                    catch(ArrayIndexOutOfBoundsException e){
+                        p.sendMessage(TextValues.ALERT + this.translateString(("error-command-message1")));
+                        return true;
+                    }
+                	
+                    int landid = -1;
+                    Map<String, Object> sellData = new HashMap<String, Object>();
+                    
+                    try{
+                        landid = Integer.parseInt(args[1]);
+                    }catch(NumberFormatException e){
+                        p.sendMessage(TextValues.ALERT + this.translateString(("error-command-message"), String.valueOf(2)));
+                        return true;
+                    }
 
                     try{
-                        landid = (int) this.getLand((int) p.getX(), (int) p.getZ(), p.getLevel().getName()).get("id");
+                        sellData = this.getSQL().getLandById(landid);
                     }catch(NullPointerException e){
                         p.sendMessage(TextValues.ALERT + this.translateString("player-noSuchLandId"));
                         return true;
@@ -555,12 +572,11 @@ public class MoneySLand extends PluginBase {
     /****************/
 
     public void helpMessage(CommandSender sender){
-        /*IO処理は重いので別スレッドで*/
         Thread th = new Thread(new Runnable(){
             @Override
             public void run() {
                 try{
-                    BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("Help.txt"), "UTF-8"));
+                    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File("./plugins/MoneySLand/Help.txt")), "UTF-8"));
                     String txt;
                     boolean op = (boolean) sender.isOp();
                     boolean send = true;
@@ -579,6 +595,7 @@ public class MoneySLand extends PluginBase {
                         }
                         if(send) sender.sendMessage(txt);
                     }
+                    br.close();
                 }catch(IOException e){
                     e.printStackTrace();
                 }
@@ -658,6 +675,22 @@ public class MoneySLand extends PluginBase {
         this.worldProtect = conf.getStringList("worldProtect");
 
         return;
+    }
+    
+    public void initHelpFile(){
+    	if(!new File("./plugins/MoneySLand/Help.txt").exists()){
+            try {
+                FileWriter fw = new FileWriter(new File("./plugins/MoneySLand/Help.txt"), true);
+                PrintWriter pw = new PrintWriter(fw);
+                pw.println("");
+                pw.close();
+                
+                Utils.writeFile(new File("./plugins/MoneySLand/Help.txt"), this.getClass().getClassLoader().getResourceAsStream("Help.txt"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+    	}
+    	return;
     }
 
     private void resetLandData(String name){

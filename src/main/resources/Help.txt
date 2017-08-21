@@ -22,4 +22,4 @@
 §f[Java版]Itsu, popkechupki [PHP版]MasterF
 §fこのプラグインはMasterF氏開発のMyLandプラグインを開発者の承諾のもと、Javaに移植をしたものです。
 
-MoneySAPI Build2.2 Performing version
+MoneySAPI Build3.0 Official version

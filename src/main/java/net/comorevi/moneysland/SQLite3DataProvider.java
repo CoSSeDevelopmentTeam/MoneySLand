@@ -99,8 +99,9 @@ public class SQLite3DataProvider {
                 return (list.size() > 0) ? list : null;
             }else{
                 list = new HashMap<String, Object>();
-                ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and endx <= "+ x +") and (startz >= "+ z +" and endz <= "+ z +") and world = '"+ world +"'");
-                //Mega //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and startz <= "+ z +") and (endx >= "+ x +" and endz >= "+ z +") and world = '"+ world +"'");
+                //!Fami //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and endx <= "+ x +") and (startz >= "+ z +" and endz <= "+ z +") and world = '"+ world +"'");
+                ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and startz <= "+ z +") and (endx >= "+ x +" and endz >= "+ z +") and world = '"+ world +"'");
+                //EconomyLand //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (endx > "+ x +" and endz > "+ z +") and (startx < "+ x +" and startz <= "+ z +") and world = '"+ world +"'");
                 while(rs1.next()) {
                     list.put("id", rs.getInt("id"));
                     list.put("owner", rs.getString("owner"));
@@ -177,8 +178,10 @@ public class SQLite3DataProvider {
                 return (int) list.get("id") > 0;
             }else{
                 list = new HashMap<String, Object>();
-                ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and endx <= "+ x +") and (startz >= "+ z +" and endz <= "+ z +") and world = '"+ world +"'");
-                //Mega //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and startz <= "+ z +") and (endx >= "+ x +" and endz >= "+ z +") and world = '"+ world +"'");
+                //!Fami //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and endx <= "+ x +") and (startz >= "+ z +" and endz <= "+ z +") and world = '"+ world +"'");
+                ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and startz <= "+ z +") and (endx >= "+ x +" and endz >= "+ z +") and world = '"+ world +"'");
+                //EconomyLand //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (endx > "+ x +" and endz > "+ z +") and (startx < "+ x +" and startz <= "+ z +") and world = '"+ world +"'");
+                //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx < "+ x +" and endx > "+ x +") and (startz < "+ z +" and endz > "+ z +") and world = '"+ world +"'");
                 while(rs1.next()) {
                     list.put("id", rs.getInt("id"));
                     list.put("owner", rs.getString("owner"));
