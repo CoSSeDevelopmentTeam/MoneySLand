@@ -155,42 +155,41 @@ public class MoneySLand extends PluginBase {
     /** 計算関連  */
     /**************/
 
-    public int calculateLandPrice(String name) {
+    public int calculateLandPrice(Player player) {
         int start[] = new int[2];
         int end[] = new int[2];
 
-        start[0] = Math.min(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
-        start[1] = Math.max(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
-        end[0] = Math.min(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
-        end[1] = Math.max(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
+        Job job = Job.get(player);
+        int[] pos1 = job.getStart();
+        int[] pos2 = job.getEnd();
 
-        return (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * landPrice;
+        start[0] = Math.min(pos1[0], pos2[0]); // x minimum
+        start[1] = Math.min(pos1[1], pos2[1]); // z minimum
+        end[0]   = Math.max(pos1[0], pos2[0]); // x maximum
+        end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
+
+        return (end[0] + 1 - start[0]) * (end[1] + 1 - start[1]) * landPrice;
     }
 
-    public int calculateLandSize(String name) {
+    public int calculateLandSize(Player player) {
         int start[] = new int[2];
         int end[] = new int[2];
 
-        start[0] = Math.min(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
-        start[1] = Math.max(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
-        end[0] = Math.min(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
-        end[1] = Math.max(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
+        Job job = Job.get(player);
+        int[] pos1 = job.getStart();
+        int[] pos2 = job.getEnd();
 
-        return (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * 1;
+        start[0] = Math.min(pos1[0], pos2[0]); // x minimum
+        start[1] = Math.min(pos1[1], pos2[1]); // z minimum
+        end[0]   = Math.max(pos1[0], pos2[0]); // x maximum
+        end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
+
+        return (end[0] + 1 - start[0]) * (end[1] + 1 - start[1]) * 1;
     }
 
     public boolean checkOverLap(int[] start, int[] end, String world) {
-        Map<String, Object> map;
-        for(int id : this.getSQL().getAllLands()){
-            if(this.sql.getLandById(id).get("world").equals(world)){
-                map = this.sql.getLandById(id);
-                if((int) map.get("startx") >= start[0] && (int) map.get("startz") >= start[1]
-                        && (int) map.get("endx") <= end[0] && (int) map.get("endz") <= end[1]){
-                    return true;
-                }
-            }
-        }
-        return false;
+
+        return sql.checkOverTrap(start, end, world);
     }
 
     /**************/
@@ -277,12 +276,12 @@ public class MoneySLand extends PluginBase {
                                 p.sendMessage(TextValues.ALERT + this.translateString("error-landSizeLimitOver", String.valueOf(size), String.valueOf(landSize)));
                                 return true;
                             }else{
-                                int price = this.calculateLandPrice(name);
+                                int price = this.calculateLandPrice(p);
                                 p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
                                 return true;
                             }
                         }else{
-                            int price = this.calculateLandPrice(name);
+                            int price = this.calculateLandPrice(p);
                             p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
                         }
                     }
@@ -295,11 +294,11 @@ public class MoneySLand extends PluginBase {
                     try{
                         if(this.setPos.get(name) == null){
                             this.setPos.put(name, new Integer[2][2]);
-                            this.resetLandData(name);
+//                            this.resetLandData(name);
                         }
                     }catch(NullPointerException e){
                         this.setPos.put(name, new Integer[2][2]);
-                        this.resetLandData(name);
+//                        this.resetLandData(name);
                     }
 
                     this.setPos.get(name)[1][0] = endX;
@@ -307,18 +306,18 @@ public class MoneySLand extends PluginBase {
                     p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(2), String.valueOf(endX), String.valueOf(endZ)));
 
                     if(!(this.setPos.get(name)[0][0] == 999999999) && !(this.setPos.get(name)[0][1] == 999999999) && !(this.setPos.get(name)[1][0] == 999999999) && !(this.setPos.get(name)[1][1] == 999999999) && this.setPos.get(name).length >= 2){
-                        int size = this.calculateLandSize(name);
+                        int size = this.calculateLandSize(p);
                         if(!(landSize == -1)){
                             if(size > landSize){
                                 p.sendMessage(TextValues.ALERT + this.translateString("error-landSizeLimitOver", String.valueOf(size), String.valueOf(landSize)));
                                 return true;
                             }else{
-                                int price = this.calculateLandPrice(name);
+                                int price = this.calculateLandPrice(p);
                                 p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
                                 return true;
                             }
                         }else{
-                            int price = this.calculateLandPrice(name);
+                            int price = this.calculateLandPrice(p);
                             p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
                         }
                     }
@@ -358,7 +357,7 @@ public class MoneySLand extends PluginBase {
                             this.getConfig().save();
                             p.sendMessage(TextValues.INFO + this.translateString("player-landBuy", String.valueOf(s), String.valueOf(price), UNIT));
                             this.money.setMoney(p, this.money.getMoney(p) - price);
-                            this.resetLandData(name);
+//                            this.resetLandData(name);
                             return true;
                         }else{
                             p.sendMessage(TextValues.ALERT + this.translateString("error-no-money"));
@@ -693,13 +692,5 @@ public class MoneySLand extends PluginBase {
     	return;
     }
 
-    private void resetLandData(String name){
-        /*マイクラにはない座標(999999999)を代入しておくことでコマンドが実行されたか判定*/
-        this.setPos.get(name)[0][0] = 999999999;
-        this.setPos.get(name)[0][1] = 999999999;
-        this.setPos.get(name)[1][0] = 999999999;
-        this.setPos.get(name)[1][1] = 999999999;
-        return;
-    }
 
 }

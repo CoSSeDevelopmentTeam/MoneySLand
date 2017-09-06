@@ -20,13 +20,16 @@
  *
  */
 
+/*
+    Data StartX <= EndX
+    Data StartZ <= EndZ
+
+    Data
+ */
 package net.comorevi.moneysland;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +48,11 @@ public class SQLite3DataProvider {
     public void createLand(int id, String owner, int startx, int startz, int endx, int endz, int size, String world) {
         this.connect();
         try {
-            statement.executeUpdate("INSERT INTO land(id, owner, startx, startz, endx, endz, size, world) VALUES(" + id + ", '"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')");
+            statement.executeUpdate(
+                    "INSERT INTO land" +
+                            "(id, owner, startx, startz, endx, endz, size, world)" +
+                            " VALUES(" + id + ", '"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')"
+            );
             this.printAllData();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -83,7 +90,10 @@ public class SQLite3DataProvider {
         this.connect();
         Map<String, Object> list = new HashMap<String, Object>();
         try {
-            ResultSet rs = statement.executeQuery("SELECT * from land WHERE (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
+            ResultSet rs = statement.executeQuery(
+                    "SELECT * from land WHERE (startx <= "+ x +" and endx >= "+ x +")" +
+                            " and " +
+                            "(startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
             while(rs.next()) {
                 list.put("id", rs.getInt("id"));
                 list.put("owner", rs.getString("owner"));
@@ -240,10 +250,42 @@ public class SQLite3DataProvider {
             connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
             statement = connection.createStatement();
             statement.setQueryTimeout(30);
-            statement.executeUpdate("CREATE table if not exists land (id integer primary key autoincrement, owner text not null, startx integer not null, startz integer not null, endx integer not null, endz integer not null, size integer not null, world text not null)");
-            statement.executeUpdate("CREATE table if not exists invite (id integer not null, name text not null)");
+            statement.executeUpdate("CREATE table if not exists land " +
+                    "(" +
+                    "id integer primary key autoincrement, " +
+                    "owner text not null, " +
+                    "startx integer not null, " +
+                    "startz integer not null, " +
+                    "endx integer not null, " +
+                    "endz integer not null, " +
+                    "size integer not null, " +
+                    "world text not null" +
+                    ")"
+            );
+            statement.executeUpdate(
+                    "CREATE table if not exists invite " +
+                            "(" +
+                            "id integer not null, " +
+                            "name text not null" +
+                            ")"
+            );
         } catch(SQLException e) {
             System.err.println(e.getMessage());
+        }
+    }
+
+    public boolean checkOverTrap(int[] start, int[] end, String world) {
+        try {
+            ResultSet rs = statement.executeQuery(
+                    "select * from land " +
+                    "WHERE (start[0] <= startx AND start[1] <= startz AND end[0] >= startx AND end[1] >= startz) OR " +
+                    "(start[0] <= endx AND start[1] <= startz AND end[0] >= endx AND end[1] >= startz) OR " +
+                    "(start[0] <= startx AND start[1] <= endz AND end[0] >= startx AND end[1] >= endz) OR " +
+                    "(start[0] <= endx AND start[1] <= endz AND end[0] >= endx AND end[1] >= endz)"
+            );
+            return rs.next(); //次の要素があるか。即ち土地の被りがあるか
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -251,7 +293,7 @@ public class SQLite3DataProvider {
         try {
             ResultSet rs = statement.executeQuery("select * from land");
             while(rs.next()) {
-                System.out.println("");
+                System.out.println("-----------------------");
                 System.out.println("id = " + rs.getInt("id"));
                 System.out.println("owner = " + rs.getString("owner"));
                 System.out.println("startx = " + rs.getInt("startx"));
