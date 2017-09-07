@@ -15,7 +15,8 @@ public class Job {
     public static final int JOB_SUCCESSFUL   = 0;
     public static final int JOB_ERROR        = 1;
 
-    public static final int ERROR_INVAILD_VALUE = 1;
+
+    public static final int ERROR_INVALID_VALUE = 0;
 
     // Singleton
     private static HashMap<String, Job> Job_data;
@@ -38,6 +39,8 @@ public class Job {
     private int[] end   = new int[2];   //[0 => x, 1 => z]
     private String world;
 
+    public int error = -1;
+
     private Job(Player player) {
         status = Job.WAITING;
         this.player = player;
@@ -59,14 +62,28 @@ public class Job {
 
     public int buy() {
         MoneySLand main = MoneySLand.getInstance();
+
         if(!isValidValue()) {
+            error = Job.ERROR_INVALID_VALUE;
             return Job.JOB_ERROR;
         }
 
-        if (MoneySAPI)
+        int[] pos1 = getStart();
+        int[] pos2 = getEnd();
+
+        start[0] = Math.min(pos1[0], pos2[0]); // x minimum
+        start[1] = Math.min(pos1[1], pos2[1]); // z minimum
+        end[0]   = Math.max(pos1[0], pos2[0]); // x maximum
+        end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
+
+        int price = (end[0] + 1 - start[0]) * (end[1] + 1 - start[1]) * MoneySLand.landPrice;
+
+        if (MoneySAPI.getInstance().getMoney(player) < price) {
+
+        }
         main.checkOverLap(start, end, world);
 
-
+        return Job.JOB_SUCCESSFUL;
     }
 
     public boolean isValidValue() {

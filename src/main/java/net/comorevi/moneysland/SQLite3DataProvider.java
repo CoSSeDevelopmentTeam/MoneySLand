@@ -286,6 +286,7 @@ public class SQLite3DataProvider {
             return rs.next(); //次の要素があるか。即ち土地の被りがあるか
         } catch (SQLException e) {
             e.printStackTrace();
+            return true;
         }
     }
 

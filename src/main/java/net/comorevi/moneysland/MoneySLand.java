@@ -73,8 +73,8 @@ import net.comorevi.moneyapi.MoneySAPI;
 public class MoneySLand extends PluginBase {
 
     private static final String UNIT = "MS";
-    private static int landPrice = 100;
-    private static int landSize = 500;
+    public static int landPrice = 100;
+    public static int landSize = 500;
     private static int landId;
 
     private MoneySAPI money;
@@ -249,78 +249,37 @@ public class MoneySLand extends PluginBase {
             String name = sender.getName().toLowerCase();
 
             Player p = (Player)sender;
+            Job job;
 
             switch(args[0]){
                 case "start":
+
+                    job = Job.get(p);
+
                     int startX = (int)p.getX();
                     int startZ = (int)p.getZ();
 
-                    try{
-                        if(this.setPos.get(name) == null){
-                            this.setPos.put(name, new Integer[2][2]);
-                            this.resetLandData(name);
-                        }
-                    }catch(NullPointerException e){
-                        this.setPos.put(name, new Integer[2][2]);
-                        this.resetLandData(name);
-                    }
+                    job.end(startX, startZ);
 
-                    this.setPos.get(name)[0][0] = startX;
-                    this.setPos.get(name)[0][1] = startZ;
-                    p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(1), String.valueOf(startX), String.valueOf(startZ)));
+                    p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(2), String.valueOf(startX), String.valueOf(startZ)));
 
-                    if(!(this.setPos.get(name)[0][0] == 999999999) && !(this.setPos.get(name)[0][1] == 999999999) && !(this.setPos.get(name)[1][0] == 999999999) && !(this.setPos.get(name)[1][1] == 999999999) && this.setPos.get(name).length >= 2){
-                        int size = this.calculateLandSize(name);
-                        if(!(landSize == -1)){
-                            if(size > landSize){
-                                p.sendMessage(TextValues.ALERT + this.translateString("error-landSizeLimitOver", String.valueOf(size), String.valueOf(landSize)));
-                                return true;
-                            }else{
-                                int price = this.calculateLandPrice(p);
-                                p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
-                                return true;
-                            }
-                        }else{
-                            int price = this.calculateLandPrice(p);
-                            p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
-                        }
-                    }
                     return true;
 
                 case "end":
-                    int endX = (int)p.getX();
-                    int endZ = (int)p.getZ();
 
-                    try{
-                        if(this.setPos.get(name) == null){
-                            this.setPos.put(name, new Integer[2][2]);
-//                            this.resetLandData(name);
-                        }
-                    }catch(NullPointerException e){
-                        this.setPos.put(name, new Integer[2][2]);
-//                        this.resetLandData(name);
-                    }
+                    job = Job.get(p);
 
-                    this.setPos.get(name)[1][0] = endX;
-                    this.setPos.get(name)[1][1] = endZ;
+                    int endX = p.getFloorX();
+                    int endZ = p.getFloorZ();
+                    job.end(endX, endZ);
+
+
                     p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(2), String.valueOf(endX), String.valueOf(endZ)));
 
-                    if(!(this.setPos.get(name)[0][0] == 999999999) && !(this.setPos.get(name)[0][1] == 999999999) && !(this.setPos.get(name)[1][0] == 999999999) && !(this.setPos.get(name)[1][1] == 999999999) && this.setPos.get(name).length >= 2){
-                        int size = this.calculateLandSize(p);
-                        if(!(landSize == -1)){
-                            if(size > landSize){
-                                p.sendMessage(TextValues.ALERT + this.translateString("error-landSizeLimitOver", String.valueOf(size), String.valueOf(landSize)));
-                                return true;
-                            }else{
-                                int price = this.calculateLandPrice(p);
-                                p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
-                                return true;
-                            }
-                        }else{
-                            int price = this.calculateLandPrice(p);
-                            p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
-                        }
+                    if(job.isValidValue()) { // 値がすべて入力されているなら
+
                     }
+
                     return true;
 
                 case "buy":
