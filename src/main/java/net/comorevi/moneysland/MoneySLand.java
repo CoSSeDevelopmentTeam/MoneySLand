@@ -254,12 +254,12 @@ public class MoneySLand extends PluginBase {
             switch(args[0]){
                 case "start":
 
-                    job = Job.get(p);
+                    job = Job.create(p);
 
                     int startX = (int)p.getX();
                     int startZ = (int)p.getZ();
 
-                    job.end(startX, startZ);
+                    job.start(startX, startZ);
 
                     p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(2), String.valueOf(startX), String.valueOf(startZ)));
 
@@ -268,6 +268,12 @@ public class MoneySLand extends PluginBase {
                 case "end":
 
                     job = Job.get(p);
+
+                    if(job == null || job.getStatus() == Job.BOUGHT) { //設定されているか,または購入済みか?
+                        p.sendMessage(TextValues.WARNING + this.translateString("error-not-selected"));
+                        return true;
+                    }
+
 
                     int endX = p.getFloorX();
                     int endZ = p.getFloorZ();

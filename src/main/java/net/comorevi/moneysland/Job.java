@@ -100,4 +100,8 @@ public class Job {
         return end;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
 }
