@@ -74,7 +74,7 @@ public class MoneySLand extends PluginBase {
 
     private static final String UNIT = "MS";
     public static int landPrice = 100;
-    public static int landSize = 500;
+    public static int maxLandSize = 500;
     private static int landId;
 
     private MoneySAPI money;
@@ -206,10 +206,10 @@ public class MoneySLand extends PluginBase {
         this.initHelpFile();
 
         this.getLogger().info(this.translateString("message-onEnable"));
-        if(landSize == -1){
+        if(maxLandSize == -1){
             this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, "無制限"));
         }else{
-            this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, String.valueOf(landSize) + "ブロック"));
+            this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, String.valueOf(maxLandSize) + "ブロック"));
         }
 
         try{
@@ -283,7 +283,13 @@ public class MoneySLand extends PluginBase {
                     p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(2), String.valueOf(endX), String.valueOf(endZ)));
 
                     if(job.isValidValue()) { // 値がすべて入力されているなら
+                        int price = calculateLandPrice(p);
+                        int size  = calculateLandSize(p);
 
+                        if(maxLandSize != -1 && size >= maxLandSize) {
+                            p.sendMessage(TextValues.ALERT + this.translateString("error-landSizeLimitOver", String.valueOf(size), String.valueOf(maxLandSize)));
+                            return true;
+                        }
                     }
 
                     return true;
@@ -485,9 +491,9 @@ public class MoneySLand extends PluginBase {
                                 return true;
                             }
 
-                            landSize = landS;
+                            maxLandSize = landS;
 
-                            this.getConfig().set("landSize", landSize);
+                            this.getConfig().set("landSize", maxLandSize);
                             this.getConfig().save();
 
                             return true;
@@ -634,7 +640,7 @@ public class MoneySLand extends PluginBase {
 
         /*コンフィグからデータを取得*/
         landPrice = (int) pluginData.get("landPrice");
-        landSize = (int) pluginData.get("landSize");
+        maxLandSize = (int) pluginData.get("landSize");
         landId = (int) pluginData.get("landId");
         this.worldProtect = conf.getStringList("worldProtect");
 
