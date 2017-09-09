@@ -118,8 +118,8 @@ public class MoneySLand extends PluginBase {
         return sql.existsLand(x, z, world);
     }
 
-    public void createLand(int id, String owner, int[] start, int[] end, int size, String world) {
-        sql.createLand(id, owner, start[0], start[1], end[0], end[1], size, world);
+    public void createLand(String owner, int[] start, int[] end, int size, String world) {
+        sql.createLand(owner, start[0], start[1], end[0], end[1], size, world);
     }
 
     public int deleteLand(String name, int x, int z, String world){
@@ -156,19 +156,7 @@ public class MoneySLand extends PluginBase {
     /**************/
 
     public int calculateLandPrice(Player player) {
-        int start[] = new int[2];
-        int end[] = new int[2];
-
-        Job job = Job.get(player);
-        int[] pos1 = job.getStart();
-        int[] pos2 = job.getEnd();
-
-        start[0] = Math.min(pos1[0], pos2[0]); // x minimum
-        start[1] = Math.min(pos1[1], pos2[1]); // z minimum
-        end[0]   = Math.max(pos1[0], pos2[0]); // x maximum
-        end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
-
-        return (end[0] + 1 - start[0]) * (end[1] + 1 - start[1]) * landPrice;
+        return calculateLandSize(player) * landPrice;
     }
 
     public int calculateLandSize(Player player) {
@@ -184,7 +172,7 @@ public class MoneySLand extends PluginBase {
         end[0]   = Math.max(pos1[0], pos2[0]); // x maximum
         end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
 
-        return (end[0] + 1 - start[0]) * (end[1] + 1 - start[1]) * 1;
+        return (end[0] + 1 - start[0]) * (end[1] + 1 - start[1]);
     }
 
     public boolean checkOverLap(int[] start, int[] end, String world) {
@@ -295,13 +283,11 @@ public class MoneySLand extends PluginBase {
                     return true;
 
                 case "buy":
-                    try{
-                        if(this.setPos.get(name).length == 0 || this.setPos.get(name).length < 2){
-                            p.sendMessage(TextValues.ALERT + this.translateString("error-not-selected"));
-                            return true;
-                        }
-                    }catch(NullPointerException e){
-                        p.sendMessage(TextValues.ALERT + this.translateString("error-not-selected"));
+
+                    job = Job.get(p);
+
+                    if(job == null || !(job.getStatus() == Job.IN_ENTRY && job.isValidValue())) { //選択されていないか、もしくは購入後か?
+                        p.sendMessage(this.translateString("error-not-selected"));
                         return true;
                     }
 
@@ -309,23 +295,22 @@ public class MoneySLand extends PluginBase {
 
                     int[] start = new int[2];
                     int[] end = new int[2];
+                    int[] pos1 = job.getStart();
+                    int[] pos2 = job.getEnd();
 
-                    start[0] = Math.min(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
-                    start[1] = Math.max(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
-                    end[0] = Math.min(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
-                    end[1] = Math.max(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
+                    start[0] = Math.min(pos1[0], pos2[0]); // x minimum
+                    start[1] = Math.min(pos1[1], pos2[1]); // z minimum
+                    end[0]   = Math.max(pos1[0], pos2[0]); // x maximum
+                    end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
 
                     if(!this.checkOverLap(start, end, worldName)){
-                        int price = (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * landPrice;
-                        int s = (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * 1;
+                        int price = calculateLandPrice(p);
+                        int s = calculateLandSize(p);
 
                         String nameB = p.getName().toLowerCase();
                         if(this.money.getMoney(p) >=price){
                             int id = this.getConfig().getInt("landId");
-                            this.createLand(id, nameB, start, end, s, worldName);
-                            id++;
-                            this.getConfig().set("landId", id);
-                            this.getConfig().save();
+                            this.createLand(nameB, start, end, s, worldName);
                             p.sendMessage(TextValues.INFO + this.translateString("player-landBuy", String.valueOf(s), String.valueOf(price), UNIT));
                             this.money.setMoney(p, this.money.getMoney(p) - price);
 //                            this.resetLandData(name);
@@ -535,6 +520,11 @@ public class MoneySLand extends PluginBase {
             }
         }
         return false;
+    }
+
+    public boolean onCommandByConsole(ConsoleCommandSender sender, Command command, String label, String[] args) {
+
+        return true;
     }
 
     /****************/

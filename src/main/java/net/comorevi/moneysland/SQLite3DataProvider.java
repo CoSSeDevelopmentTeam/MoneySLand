@@ -45,13 +45,13 @@ public class SQLite3DataProvider {
         this.connect();
     }
 
-    public void createLand(int id, String owner, int startx, int startz, int endx, int endz, int size, String world) {
+    public void createLand(String owner, int startx, int startz, int endx, int endz, int size, String world) {
         this.connect();
         try {
             statement.executeUpdate(
                     "INSERT INTO land" +
-                            "(id, owner, startx, startz, endx, endz, size, world)" +
-                            " VALUES(" + id + ", '"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')"
+                            "(owner, startx, startz, endx, endz, size, world)" +
+                            " VALUES("+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')"
             );
             this.printAllData();
         } catch (SQLException e) {

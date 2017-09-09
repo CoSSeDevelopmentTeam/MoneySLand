@@ -76,11 +76,12 @@ public class Job {
         end[0]   = Math.max(pos1[0], pos2[0]); // x maximum
         end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
 
-        int price = (end[0] + 1 - start[0]) * (end[1] + 1 - start[1]) * MoneySLand.landPrice;
+        int price = main.calculateLandPrice(player);
 
         if (MoneySAPI.getInstance().getMoney(player) < price) {
-
+            player.sendMessage(main.translateString("error-no-money"));
         }
+
         main.checkOverLap(start, end, world);
 
         return Job.JOB_SUCCESSFUL;
