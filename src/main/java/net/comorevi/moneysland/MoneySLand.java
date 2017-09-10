@@ -262,7 +262,6 @@ public class MoneySLand extends PluginBase {
                         return true;
                     }
 
-
                     int endX = p.getFloorX();
                     int endZ = p.getFloorZ();
                     job.end(endX, endZ);
@@ -293,35 +292,16 @@ public class MoneySLand extends PluginBase {
 
                     String worldName = p.getLevel().getName();
 
-                    int[] start = new int[2];
-                    int[] end = new int[2];
-                    int[] pos1 = job.getStart();
-                    int[] pos2 = job.getEnd();
 
-                    start[0] = Math.min(pos1[0], pos2[0]); // x minimum
-                    start[1] = Math.min(pos1[1], pos2[1]); // z minimum
-                    end[0]   = Math.max(pos1[0], pos2[0]); // x maximum
-                    end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
-
-                    if(!this.checkOverLap(start, end, worldName)){
-                        int price = calculateLandPrice(p);
-                        int s = calculateLandSize(p);
-
-                        String nameB = p.getName().toLowerCase();
-                        if(this.money.getMoney(p) >=price){
-                            int id = this.getConfig().getInt("landId");
-                            this.createLand(nameB, start, end, s, worldName);
-                            p.sendMessage(TextValues.INFO + this.translateString("player-landBuy", String.valueOf(s), String.valueOf(price), UNIT));
-                            this.money.setMoney(p, this.money.getMoney(p) - price);
-//                            this.resetLandData(name);
+                    switch(job.buy()) {
+                        case Job.JOB_SUCCESSFUL:
+                            int size = calculateLandSize(p);
+                            p.sendMessage(translateString("player-landBuy", String.valueOf(size), String.valueOf(size * landPrice), UNIT));
                             return true;
-                        }else{
-                            p.sendMessage(TextValues.ALERT + this.translateString("error-no-money"));
+
+                        case Job.JOB_ERROR:
+                            errorHandle(p);
                             return true;
-                        }
-                    }else{
-                        p.sendMessage(TextValues.ALERT + this.translateString("error-land-alreadyused"));
-                        return true;
                     }
 
                 case "sell":
@@ -525,6 +505,10 @@ public class MoneySLand extends PluginBase {
     public boolean onCommandByConsole(ConsoleCommandSender sender, Command command, String label, String[] args) {
 
         return true;
+    }
+
+    public void errorHandle(Player player) {
+        
     }
 
     /****************/

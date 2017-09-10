@@ -16,7 +16,11 @@ public class Job {
     public static final int JOB_ERROR        = 1;
 
 
-    public static final int ERROR_INVALID_VALUE = 0;
+    public static final int ERROR_INVALID_VALUE   = 0;
+    public static final int ERROR_NO_MONEY        = 1;
+    public static final int ERROR_ALREADY_USED    = 2;
+    public static final int ERROR_SIZE_LIMIT_OVER = 3;
+
 
     // Singleton
     private static HashMap<String, Job> Job_data;
@@ -77,13 +81,27 @@ public class Job {
         end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
 
         int price = main.calculateLandPrice(player);
+        int size  = main.calculateLandSize(player);
 
         if (MoneySAPI.getInstance().getMoney(player) < price) {
-            player.sendMessage(main.translateString("error-no-money"));
+            error = Job.ERROR_NO_MONEY;
+            return Job.JOB_ERROR;
         }
 
-        main.checkOverLap(start, end, world);
+        if(main.checkOverLap(start, end, world)) {
+            error = Job.ERROR_ALREADY_USED;
+            return Job.JOB_ERROR;
+        }
 
+        if(size >= MoneySLand.maxLandSize) {
+            error = Job.ERROR_SIZE_LIMIT_OVER;
+            return Job.JOB_ERROR;
+        }
+
+        MoneySAPI.getInstance().addMoney(player, -price);
+        main.createLand(player.getName().toLowerCase(), start, end, size, world.toLowerCase());
+
+        status = BOUGHT;
         return Job.JOB_SUCCESSFUL;
     }
 
