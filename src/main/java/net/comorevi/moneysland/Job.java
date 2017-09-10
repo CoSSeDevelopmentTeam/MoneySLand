@@ -126,6 +126,29 @@ public class Job {
     public String getErrorMessage() {
         String message = "";
         // TODO エラーごとにメッセージを指定
+        switch (error) {
+            case ERROR_INVALID_VALUE:
+                message = "error-not-selected";
+                break;
+
+            case ERROR_NO_MONEY:
+                message = "error-no-money";
+                break;
+
+            case ERROR_ALREADY_USED:
+                message = "error-land-alreadyused";
+                break;
+
+            case ERROR_SIZE_LIMIT_OVER: //特別なやつなのでここで処理
+                message = "error-landSizeLimitOver";
+                MoneySLand main = MoneySLand.getInstance();
+                return main.translateString(message, String.valueOf(main.calculateLandSize(player)), String.valueOf(MoneySLand.maxLandSize));
+
+            default:
+                message = "error-notFoundKey";
+                break;
+
+        }
         return MoneySLand.getInstance().translateString(message);
     }
 
