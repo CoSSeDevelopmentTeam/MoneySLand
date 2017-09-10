@@ -300,7 +300,7 @@ public class MoneySLand extends PluginBase {
                             return true;
 
                         case Job.JOB_ERROR:
-                            errorHandle(p);
+                            p.sendMessage(job.getErrorMessage());
                             return true;
                     }
 

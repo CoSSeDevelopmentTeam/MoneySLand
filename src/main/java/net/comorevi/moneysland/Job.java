@@ -123,4 +123,10 @@ public class Job {
         return status;
     }
 
+    public String getErrorMessage() {
+        String message = "";
+        // TODO エラーごとにメッセージを指定
+        return MoneySLand.getInstance().translateString(message);
+    }
+
 }
