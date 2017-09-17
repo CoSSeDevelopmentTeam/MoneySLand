@@ -46,7 +46,6 @@ public class SQLite3DataProvider {
         this.connect();
         try {
             statement.executeUpdate("INSERT INTO land(id, owner, startx, startz, endx, endz, size, world) VALUES(" + id + ", '"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')");
-            this.printAllData();
         } catch (SQLException e) {
             e.printStackTrace();
         }
