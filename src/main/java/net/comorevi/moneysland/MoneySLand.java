@@ -141,6 +141,10 @@ public class MoneySLand extends PluginBase {
 
             String name = player.getName().toLowerCase();
 
+            if((int) land.get("startx") < (int) land.get("endx") && (int) land.get("startz") < (int) land.get("endz")){
+                return false;
+            }
+
             if(land.get("owner").equals(name)){
                 return true;
             }
@@ -336,10 +340,10 @@ public class MoneySLand extends PluginBase {
                     }
 
                     String worldName = p.getLevel().getName();
-                    
+
                     if(isWorldProtect(worldName)){
-                    	 p.sendMessage(TextValues.INFO + this.translateString("error-cannotBuy"));
-                    	 return true;
+                         p.sendMessage(TextValues.INFO + this.translateString("error-cannotBuy"));
+                         return true;
                     }
 
                     int[] start = new int[2];
@@ -351,6 +355,12 @@ public class MoneySLand extends PluginBase {
                     end[1] = Math.max(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
 
                     if(!this.checkOverLap(start, end, worldName)){
+
+                        if(start[0] < end[0] && start[1] < end[1]){//例の条件式
+                            p.sendMessage(TextValues.INFO + this.translateString("error-cannotBuy"));
+                            return true;
+                        }
+
                         int price = (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * landPrice;
                         int s = (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * 1;
 
@@ -375,15 +385,15 @@ public class MoneySLand extends PluginBase {
                     }
 
                 case "sell":
-                	try{if(args[1] != null){}}
+                    try{if(args[1] != null){}}
                     catch(ArrayIndexOutOfBoundsException e){
                         p.sendMessage(TextValues.ALERT + this.translateString(("error-command-message1")));
                         return true;
                     }
-                	
+
                     int landid = -1;
                     Map<String, Object> sellData = new HashMap<String, Object>();
-                    
+
                     try{
                         landid = Integer.parseInt(args[1]);
                     }catch(NumberFormatException e){
@@ -681,21 +691,21 @@ public class MoneySLand extends PluginBase {
 
         return;
     }
-    
+
     public void initHelpFile(){
-    	if(!new File("./plugins/MoneySLand/Help.txt").exists()){
+        if(!new File("./plugins/MoneySLand/Help.txt").exists()){
             try {
                 FileWriter fw = new FileWriter(new File("./plugins/MoneySLand/Help.txt"), true);
                 PrintWriter pw = new PrintWriter(fw);
                 pw.println("");
                 pw.close();
-                
+
                 Utils.writeFile(new File("./plugins/MoneySLand/Help.txt"), this.getClass().getClassLoader().getResourceAsStream("Help.txt"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-    	}
-    	return;
+        }
+        return;
     }
 
     private void resetLandData(String name){
