@@ -336,6 +336,11 @@ public class MoneySLand extends PluginBase {
                     }
 
                     String worldName = p.getLevel().getName();
+                    
+                    if(isWorldProtect(worldName)){
+                    	 p.sendMessage(TextValues.INFO + this.translateString("error-cannotBuy"));
+                    	 return true;
+                    }
 
                     int[] start = new int[2];
                     int[] end = new int[2];
