@@ -231,7 +231,7 @@ public class MoneySLand extends PluginBase {
             worlds = worlds + str + ",";
         }
         if(worlds.length() > 0){
-            worlds = worlds.substring(1, worlds.length() - 1);
+            worlds = worlds.substring(0, worlds.length() - 1);
             this.getLogger().info(this.translateString(("message-onEnable3"), worlds));
         }else{
             this.getLogger().info(this.translateString(("message-onEnable3"), "なし"));
@@ -244,7 +244,7 @@ public class MoneySLand extends PluginBase {
         }
 
         if(worlds.length() > 0){
-            worlds = worlds.substring(1, worlds.length() - 1);
+            worlds = worlds.substring(0, worlds.length() - 1);
             this.getLogger().info(this.translateString(("message-onEnable4"), worlds));
         }else{
             this.getLogger().info(this.translateString(("message-onEnable4"), "なし"));
@@ -291,7 +291,9 @@ public class MoneySLand extends PluginBase {
 
             switch(args[0]){
                 case "start":
-                    if(isNoBuyWorld(p.getLevel().getName())){
+                    this.wName = p.getLevel().getName();
+
+                    if(isNoBuyWorld(wName)){
                         p.sendMessage(TextValues.ALERT + this.translateString("error-cannotBuy"));
                         return true;
                     }
@@ -311,7 +313,6 @@ public class MoneySLand extends PluginBase {
 
                     this.setPos.get(name)[0][0] = startX;
                     this.setPos.get(name)[0][1] = startZ;
-                    this.wName = p.getLevel().getName();
                     p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(1), String.valueOf(startX), String.valueOf(startZ)));
 
                     if(!(this.setPos.get(name)[0][0] == 999999999) && !(this.setPos.get(name)[0][1] == 999999999) && !(this.setPos.get(name)[1][0] == 999999999) && !(this.setPos.get(name)[1][1] == 999999999) && this.setPos.get(name).length >= 2){
@@ -333,7 +334,9 @@ public class MoneySLand extends PluginBase {
                     return true;
 
                 case "end":
-                    if(isNoBuyWorld(p.getLevel().getName())){
+                    this.wName = p.getLevel().getName();
+
+                    if(isNoBuyWorld(wName)){
                         p.sendMessage(TextValues.ALERT + this.translateString("error-cannotBuy"));
                         return true;
                     }
@@ -386,11 +389,6 @@ public class MoneySLand extends PluginBase {
                     }
 
                     String worldName = this.wName;
-
-                    if(isNoBuyWorld(worldName)){
-                        p.sendMessage(TextValues.ALERT + this.translateString("error-cannotBuy"));
-                        return true;
-                    }
 
                     int[] start = new int[2];
                     int[] end = new int[2];
