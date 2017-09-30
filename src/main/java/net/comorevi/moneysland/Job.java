@@ -1,9 +1,10 @@
 package net.comorevi.moneysland;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+
 import cn.nukkit.Player;
 import net.comorevi.moneyapi.MoneySAPI;
-
-import java.util.HashMap;
 
 public class Job {
 
@@ -23,7 +24,7 @@ public class Job {
 
 
     // Singleton
-    private static HashMap<String, Job> Job_data;
+    private static HashMap<String, Job> Job_data = new LinkedHashMap<String, Job>();
 
     public static Job create(Player player) {
         Job job = new Job(player);
