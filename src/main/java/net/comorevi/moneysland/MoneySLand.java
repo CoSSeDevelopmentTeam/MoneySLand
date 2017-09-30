@@ -73,8 +73,8 @@ import net.comorevi.moneyapi.MoneySAPI;
 public class MoneySLand extends PluginBase {
 
     private static final String UNIT = "MS";
-    private static int landPrice = 100;
-    private static int landSize = 500;
+    public static int landPrice = 100;
+    public static int maxLandSize = 500;
     private static int landId;
 
     private MoneySAPI money;
@@ -86,7 +86,7 @@ public class MoneySLand extends PluginBase {
     private Map<String, Object> pluginData = new HashMap<String, Object>();
     private Map<String, Integer[][]> setPos = new HashMap<String, Integer[][]>();
     private List<String> worldProtect = new ArrayList<String>();
-    private List<String> noBuyWorld = new ArrayList<String>();
+    private List<String> NoBuyWorld = new ArrayList<String>();
     private List<String> help = new ArrayList<String>();
     private Config conf;
 
@@ -119,8 +119,8 @@ public class MoneySLand extends PluginBase {
         return sql.existsLand(x, z, world);
     }
 
-    public void createLand(int id, String owner, int[] start, int[] end, int size, String world) {
-        sql.createLand(id, owner, start[0], start[1], end[0], end[1], size, world);
+    public void createLand(String owner, int[] start, int[] end, int size, String world) {
+        sql.createLand(owner, start[0], start[1], end[0], end[1], size, world);
     }
 
     public int deleteLand(String name, int x, int z, String world){
@@ -142,10 +142,6 @@ public class MoneySLand extends PluginBase {
 
             String name = player.getName().toLowerCase();
 
-            if((int) land.get("startx") < (int) land.get("endx") && (int) land.get("startz") < (int) land.get("endz")){
-                return false;
-            }
-
             if(land.get("owner").equals(name)){
                 return true;
             }
@@ -155,51 +151,38 @@ public class MoneySLand extends PluginBase {
             return false;
         }
     }
-
-    public boolean isCannotBuyWorld(String worldname){
-        return this.noBuyWorld.contains(worldname);
+    
+    public boolean isNoBuyWorld(String worldname){
+    	return this.NoBuyWorld.contains(worldname);
     }
 
     /**************/
     /** 計算関連  */
     /**************/
 
-    public int calculateLandPrice(String name) {
-        int start[] = new int[2];
-        int end[] = new int[2];
-
-        start[0] = Math.min(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
-        start[1] = Math.max(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
-        end[0] = Math.min(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
-        end[1] = Math.max(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
-
-        return (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * landPrice;
+    public int calculateLandPrice(Player player) {
+        return calculateLandSize(player) * landPrice;
     }
 
-    public int calculateLandSize(String name) {
+    public int calculateLandSize(Player player) {
         int start[] = new int[2];
         int end[] = new int[2];
 
-        start[0] = Math.min(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
-        start[1] = Math.max(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
-        end[0] = Math.min(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
-        end[1] = Math.max(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
+        Job job = Job.get(player);
+        int[] pos1 = job.getStart();
+        int[] pos2 = job.getEnd();
 
-        return (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * 1;
+        start[0] = Math.min(pos1[0], pos2[0]); // x minimum
+        start[1] = Math.min(pos1[1], pos2[1]); // z minimum
+        end[0]   = Math.max(pos1[0], pos2[0]); // x maximum
+        end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
+
+        return (end[0] + 1 - start[0]) * (end[1] + 1 - start[1]);
     }
 
     public boolean checkOverLap(int[] start, int[] end, String world) {
-        Map<String, Object> map;
-        for(int id : this.getSQL().getAllLands()){
-            if(this.sql.getLandById(id).get("world").equals(world)){
-                map = this.sql.getLandById(id);
-                if((int) map.get("startx") >= start[0] && (int) map.get("startz") >= start[1]
-                        && (int) map.get("endx") <= end[0] && (int) map.get("endz") <= end[1]){
-                    return true;
-                }
-            }
-        }
-        return false;
+
+        return sql.checkOverTrap(start, end, world);
     }
 
     /**************/
@@ -216,10 +199,10 @@ public class MoneySLand extends PluginBase {
         this.initHelpFile();
 
         this.getLogger().info(this.translateString("message-onEnable"));
-        if(landSize == -1){
+        if(maxLandSize == -1){
             this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, "無制限"));
         }else{
-            this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, String.valueOf(landSize) + "ブロック"));
+            this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, String.valueOf(maxLandSize) + "ブロック"));
         }
 
         try{
@@ -259,139 +242,81 @@ public class MoneySLand extends PluginBase {
             String name = sender.getName().toLowerCase();
 
             Player p = (Player)sender;
+            Job job;
 
             switch(args[0]){
                 case "start":
-                    if(this.isCannotBuyWorld(p.getLevel().getName())){
-                        p.sendMessage(TextValues.ALERT + this.translateString("error-cannotBuy"));
+                	
+                	if(isNoBuyWorld(p.getLevel().getName())){
+                		p.sendMessage(TextValues.WARNING + this.translateString("error-cannotBuy"));
                         return true;
-                    }
+                	}
+
+                    job = Job.create(p);
 
                     int startX = (int)p.getX();
                     int startZ = (int)p.getZ();
 
-                    try{
-                        if(this.setPos.get(name) == null){
-                            this.setPos.put(name, new Integer[2][2]);
-                            this.resetLandData(name);
-                        }
-                    }catch(NullPointerException e){
-                        this.setPos.put(name, new Integer[2][2]);
-                        this.resetLandData(name);
-                    }
+                    job.start(startX, startZ);
 
-                    this.setPos.get(name)[0][0] = startX;
-                    this.setPos.get(name)[0][1] = startZ;
-                    p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(1), String.valueOf(startX), String.valueOf(startZ)));
+                    p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(2), String.valueOf(startX), String.valueOf(startZ)));
 
-                    if(!(this.setPos.get(name)[0][0] == 999999999) && !(this.setPos.get(name)[0][1] == 999999999) && !(this.setPos.get(name)[1][0] == 999999999) && !(this.setPos.get(name)[1][1] == 999999999) && this.setPos.get(name).length >= 2){
-                        int size = this.calculateLandSize(name);
-                        if(!(landSize == -1)){
-                            if(size > landSize){
-                                p.sendMessage(TextValues.ALERT + this.translateString("error-landSizeLimitOver", String.valueOf(size), String.valueOf(landSize)));
-                                return true;
-                            }else{
-                                int price = this.calculateLandPrice(name);
-                                p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
-                                return true;
-                            }
-                        }else{
-                            int price = this.calculateLandPrice(name);
-                            p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
-                        }
-                    }
                     return true;
 
                 case "end":
-                    if(this.isCannotBuyWorld(p.getLevel().getName())){
-                        p.sendMessage(TextValues.ALERT + this.translateString("error-cannotBuy"));
+                	
+                	if(isNoBuyWorld(p.getLevel().getName())){
+                		p.sendMessage(TextValues.WARNING + this.translateString("error-cannotBuy"));
+                        return true;
+                	}
+
+                    job = Job.get(p);
+
+                    if(job == null || job.getStatus() == Job.BOUGHT) { //設定されているか,または購入済みか?
+                        p.sendMessage(TextValues.WARNING + this.translateString("error-not-selected"));
                         return true;
                     }
 
-                    int endX = (int)p.getX();
-                    int endZ = (int)p.getZ();
+                    int endX = p.getFloorX();
+                    int endZ = p.getFloorZ();
+                    job.end(endX, endZ);
 
-                    try{
-                        if(this.setPos.get(name) == null){
-                            this.setPos.put(name, new Integer[2][2]);
-                            this.resetLandData(name);
-                        }
-                    }catch(NullPointerException e){
-                        this.setPos.put(name, new Integer[2][2]);
-                        this.resetLandData(name);
-                    }
 
-                    this.setPos.get(name)[1][0] = endX;
-                    this.setPos.get(name)[1][1] = endZ;
                     p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(2), String.valueOf(endX), String.valueOf(endZ)));
 
-                    if(!(this.setPos.get(name)[0][0] == 999999999) && !(this.setPos.get(name)[0][1] == 999999999) && !(this.setPos.get(name)[1][0] == 999999999) && !(this.setPos.get(name)[1][1] == 999999999) && this.setPos.get(name).length >= 2){
-                        int size = this.calculateLandSize(name);
-                        if(!(landSize == -1)){
-                            if(size > landSize){
-                                p.sendMessage(TextValues.ALERT + this.translateString("error-landSizeLimitOver", String.valueOf(size), String.valueOf(landSize)));
-                                return true;
-                            }else{
-                                int price = this.calculateLandPrice(name);
-                                p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
-                                return true;
-                            }
-                        }else{
-                            int price = this.calculateLandPrice(name);
-                            p.sendMessage(TextValues.INFO + this.translateString("player-landPrice", String.valueOf(price), UNIT));
+                    if(job.isValidValue()) { // 値がすべて入力されているなら
+                        int price = calculateLandPrice(p);
+                        int size  = calculateLandSize(p);
+
+                        if(maxLandSize != -1 && size >= maxLandSize) {
+                            p.sendMessage(TextValues.ALERT + this.translateString("error-landSizeLimitOver", String.valueOf(size), String.valueOf(maxLandSize)));
+                            return true;
                         }
                     }
+
                     return true;
 
                 case "buy":
-                    try{
-                        if(this.setPos.get(name).length == 0 || this.setPos.get(name).length < 2){
-                            p.sendMessage(TextValues.ALERT + this.translateString("error-not-selected"));
-                            return true;
-                        }
-                    }catch(NullPointerException e){
-                        p.sendMessage(TextValues.ALERT + this.translateString("error-not-selected"));
+
+                    job = Job.get(p);
+
+                    if(job == null || !(job.getStatus() == Job.IN_ENTRY && job.isValidValue())) { //選択されていないか、もしくは購入後か?
+                        p.sendMessage(this.translateString("error-not-selected"));
                         return true;
                     }
 
                     String worldName = p.getLevel().getName();
 
-                    int[] start = new int[2];
-                    int[] end = new int[2];
 
-                    start[0] = Math.min(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
-                    start[1] = Math.max(this.setPos.get(name)[0][0], this.setPos.get(name)[1][0]);
-                    end[0] = Math.min(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
-                    end[1] = Math.max(this.setPos.get(name)[0][1], this.setPos.get(name)[1][1]);
-
-                    if(!this.checkOverLap(start, end, worldName)){
-
-                        if(start[0] < end[0] && start[1] < end[1]){//例の条件式
-                            p.sendMessage(TextValues.INFO + this.translateString("error-cannotBuy"));
+                    switch(job.buy()) {
+                        case Job.JOB_SUCCESSFUL:
+                            int size = calculateLandSize(p);
+                            p.sendMessage(translateString("player-landBuy", String.valueOf(size), String.valueOf(size * landPrice), UNIT));
                             return true;
-                        }
 
-                        int price = (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * landPrice;
-                        int s = (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * 1;
-
-                        String nameB = p.getName().toLowerCase();
-                        if(this.money.getMoney(p) >=price){
-                            int id = this.getConfig().getInt("landId");
-                            this.createLand(id, nameB, start, end, s, worldName);
-                            id++;
-                            this.getConfig().set("landId", id);
-                            this.getConfig().save();
-                            p.sendMessage(TextValues.INFO + this.translateString("player-landBuy", String.valueOf(s), String.valueOf(price), UNIT));
-                            this.money.setMoney(p, this.money.getMoney(p) - price);
-                            this.resetLandData(name);
+                        case Job.JOB_ERROR:
+                            p.sendMessage(job.getErrorMessage());
                             return true;
-                        }else{
-                            p.sendMessage(TextValues.ALERT + this.translateString("error-no-money"));
-                            return true;
-                        }
-                    }else{
-                        p.sendMessage(TextValues.ALERT + this.translateString("error-land-alreadyused"));
-                        return true;
                     }
 
                 case "sell":
@@ -546,9 +471,9 @@ public class MoneySLand extends PluginBase {
                                 return true;
                             }
 
-                            landSize = landS;
+                            maxLandSize = landS;
 
-                            this.getConfig().set("landSize", landSize);
+                            this.getConfig().set("landSize", maxLandSize);
                             this.getConfig().save();
 
                             return true;
@@ -590,6 +515,15 @@ public class MoneySLand extends PluginBase {
             }
         }
         return false;
+    }
+
+    public boolean onCommandByConsole(ConsoleCommandSender sender, Command command, String label, String[] args) {
+
+        return true;
+    }
+
+    public void errorHandle(Player player) {
+
     }
 
     /****************/
@@ -685,7 +619,7 @@ public class MoneySLand extends PluginBase {
             this.conf.set("landPrice", 100);
             this.conf.set("landSize", -1);
             this.conf.set("worldProtect", new ArrayList<String>());
-            this.conf.set("noBuyWorld", new ArrayList<String>());
+            this.conf.set("NoBuyLand", new ArrayList<String>());
             this.conf.set("landId", 0);
             this.conf.save();
         }
@@ -696,10 +630,10 @@ public class MoneySLand extends PluginBase {
 
         /*コンフィグからデータを取得*/
         landPrice = (int) pluginData.get("landPrice");
-        landSize = (int) pluginData.get("landSize");
+        maxLandSize = (int) pluginData.get("landSize");
         landId = (int) pluginData.get("landId");
         this.worldProtect = conf.getStringList("worldProtect");
-        this.noBuyWorld = conf.getStringList("noBuyWorld");
+        this.NoBuyWorld = conf.getStringList("NoBuyWorld");
 
         return;
     }
@@ -720,13 +654,5 @@ public class MoneySLand extends PluginBase {
         return;
     }
 
-    private void resetLandData(String name){
-        /*マイクラにはない座標(999999999)を代入しておくことでコマンドが実行されたか判定*/
-        this.setPos.get(name)[0][0] = 999999999;
-        this.setPos.get(name)[0][1] = 999999999;
-        this.setPos.get(name)[1][0] = 999999999;
-        this.setPos.get(name)[1][1] = 999999999;
-        return;
-    }
 
 }

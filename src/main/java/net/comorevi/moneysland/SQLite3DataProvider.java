@@ -1,3 +1,4 @@
+
 /**
  * MoneySLand
  *
@@ -19,6 +20,7 @@
  * @author MasterF
  *
  */
+
 
 package net.comorevi.moneysland;
 
@@ -42,10 +44,15 @@ public class SQLite3DataProvider {
         this.connect();
     }
 
-    public void createLand(int id, String owner, int startx, int startz, int endx, int endz, int size, String world) {
+    public void createLand(String owner, int startx, int startz, int endx, int endz, int size, String world) {
         this.connect();
         try {
-            statement.executeUpdate("INSERT INTO land(id, owner, startx, startz, endx, endz, size, world) VALUES(" + id + ", '"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')");
+            statement.executeUpdate(
+                    "INSERT INTO land" +
+                            "(owner, startx, startz, endx, endz, size, world)" +
+                            " VALUES("+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')"
+            );
+            this.printAllData();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -82,7 +89,10 @@ public class SQLite3DataProvider {
         this.connect();
         Map<String, Object> list = new HashMap<String, Object>();
         try {
-            ResultSet rs = statement.executeQuery("SELECT * from land WHERE (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
+            ResultSet rs = statement.executeQuery(
+                    "SELECT * from land WHERE (startx <= "+ x +" and endx >= "+ x +")" +
+                            " and " +
+                            "(startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
             while(rs.next()) {
                 list.put("id", rs.getInt("id"));
                 list.put("owner", rs.getString("owner"));
@@ -95,6 +105,23 @@ public class SQLite3DataProvider {
             }
             if(!list.isEmpty()){
                 rs.close();
+                return (list.size() > 0) ? list : null;
+            }else{
+                list = new HashMap<String, Object>();
+                //!Fami //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and endx <= "+ x +") and (startz >= "+ z +" and endz <= "+ z +") and world = '"+ world +"'");
+                ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and startz <= "+ z +") and (endx >= "+ x +" and endz >= "+ z +") and world = '"+ world +"'");
+                //EconomyLand //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (endx > "+ x +" and endz > "+ z +") and (startx < "+ x +" and startz <= "+ z +") and world = '"+ world +"'");
+                while(rs1.next()) {
+                    list.put("id", rs.getInt("id"));
+                    list.put("owner", rs.getString("owner"));
+                    list.put("startx", rs.getInt("startx"));
+                    list.put("startz", rs.getInt("startz"));
+                    list.put("endx", rs.getInt("endx"));
+                    list.put("endz", rs.getInt("endz"));
+                    list.put("size", rs.getInt("size"));
+                    list.put("world", rs.getString("world"));
+                }
+                rs1.close();
                 return (list.size() > 0) ? list : null;
             }
         } catch (SQLException e) {
@@ -222,10 +249,43 @@ public class SQLite3DataProvider {
             connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
             statement = connection.createStatement();
             statement.setQueryTimeout(30);
-            statement.executeUpdate("CREATE table if not exists land (id integer primary key autoincrement, owner text not null, startx integer not null, startz integer not null, endx integer not null, endz integer not null, size integer not null, world text not null)");
-            statement.executeUpdate("CREATE table if not exists invite (id integer not null, name text not null)");
+            statement.executeUpdate("CREATE table if not exists land " +
+                    "(" +
+                    "id integer primary key autoincrement, " +
+                    "owner text not null, " +
+                    "startx integer not null, " +
+                    "startz integer not null, " +
+                    "endx integer not null, " +
+                    "endz integer not null, " +
+                    "size integer not null, " +
+                    "world text not null" +
+                    ")"
+            );
+            statement.executeUpdate(
+                    "CREATE table if not exists invite " +
+                            "(" +
+                            "id integer not null, " +
+                            "name text not null" +
+                            ")"
+            );
         } catch(SQLException e) {
             System.err.println(e.getMessage());
+        }
+    }
+
+    public boolean checkOverTrap(int[] start, int[] end, String world) {
+        try {
+            ResultSet rs = statement.executeQuery(
+                    "select * from land " +
+                    "WHERE (start[0] <= startx AND start[1] <= startz AND end[0] >= startx AND end[1] >= startz) OR " +
+                    "(start[0] <= endx AND start[1] <= startz AND end[0] >= endx AND end[1] >= startz) OR " +
+                    "(start[0] <= startx AND start[1] <= endz AND end[0] >= startx AND end[1] >= endz) OR " +
+                    "(start[0] <= endx AND start[1] <= endz AND end[0] >= endx AND end[1] >= endz)"
+            );
+            return rs.next(); //次の要素があるか。即ち土地の被りがあるか
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return true;
         }
     }
 
@@ -233,7 +293,7 @@ public class SQLite3DataProvider {
         try {
             ResultSet rs = statement.executeQuery("select * from land");
             while(rs.next()) {
-                System.out.println("");
+                System.out.println("-----------------------");
                 System.out.println("id = " + rs.getInt("id"));
                 System.out.println("owner = " + rs.getString("owner"));
                 System.out.println("startx = " + rs.getInt("startx"));
