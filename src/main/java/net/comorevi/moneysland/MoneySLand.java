@@ -86,6 +86,7 @@ public class MoneySLand extends PluginBase {
     private Map<String, Object> pluginData = new HashMap<String, Object>();
     private Map<String, Integer[][]> setPos = new HashMap<String, Integer[][]>();
     private List<String> worldProtect = new ArrayList<String>();
+    private List<String> NoBuyWorld = new ArrayList<String>();
     private List<String> help = new ArrayList<String>();
     private Config conf;
 
@@ -153,6 +154,10 @@ public class MoneySLand extends PluginBase {
         }catch(NullPointerException e){
             return false;
         }
+    }
+
+    public boolean isNoBuyWorld(String worldname){
+        return this.NoBuyWorld.contains(worldname);
     }
 
     /**************/
@@ -257,6 +262,11 @@ public class MoneySLand extends PluginBase {
 
             switch(args[0]){
                 case "start":
+                    if(isNoBuyWorld(p.getLevel().getName())){
+                        p.sendMessage(TextValues.ALERT + this.translateString("error-cannotBuy"));
+                        return true;
+                    }
+
                     int startX = (int)p.getX();
                     int startZ = (int)p.getZ();
 
@@ -293,6 +303,11 @@ public class MoneySLand extends PluginBase {
                     return true;
 
                 case "end":
+                    if(isNoBuyWorld(p.getLevel().getName())){
+                        p.sendMessage(TextValues.ALERT + this.translateString("error-cannotBuy"));
+                        return true;
+                    }
+
                     int endX = (int)p.getX();
                     int endZ = (int)p.getZ();
 
@@ -340,11 +355,6 @@ public class MoneySLand extends PluginBase {
                     }
 
                     String worldName = p.getLevel().getName();
-
-                    if(isWorldProtect(worldName)){
-                         p.sendMessage(TextValues.INFO + this.translateString("error-cannotBuy"));
-                         return true;
-                    }
 
                     int[] start = new int[2];
                     int[] end = new int[2];
@@ -675,6 +685,7 @@ public class MoneySLand extends PluginBase {
             this.conf.set("landPrice", 100);
             this.conf.set("landSize", -1);
             this.conf.set("worldProtect", new ArrayList<String>());
+            this.conf.set("NoBuyWorld", new ArrayList<String>());
             this.conf.set("landId", 0);
             this.conf.save();
         }
@@ -688,6 +699,7 @@ public class MoneySLand extends PluginBase {
         landSize = (int) pluginData.get("landSize");
         landId = (int) pluginData.get("landId");
         this.worldProtect = conf.getStringList("worldProtect");
+        this.NoBuyWorld = conf.getStringList("NoBuyWorld");
 
         return;
     }
