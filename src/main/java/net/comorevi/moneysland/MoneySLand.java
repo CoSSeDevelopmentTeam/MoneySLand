@@ -159,6 +159,8 @@ public class MoneySLand extends PluginBase {
     }
 
     public boolean isNoBuyWorld(String worldname){
+        this.getLogger().notice(this.NoBuyWorld.toString());
+        this.getLogger().notice(worldname);
         return this.NoBuyWorld.contains(worldname);
     }
 
