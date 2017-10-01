@@ -400,10 +400,12 @@ public class MoneySLand extends PluginBase {
 
                     if(!this.checkOverLap(start, end, worldName)){
 
-                        if(start[0] < end[0] && start[1] < end[1]){//例の条件式
+                        /*
+                        if(start[0] < end[0] && start[1] < end[1]){
                             p.sendMessage(TextValues.INFO + this.translateString("error-cannotBuy"));
                             return true;
                         }
+                        */
 
                         int price = (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * landPrice;
                         int s = (start[1] + 1 - start[0]) * (end[1] + 1 - end[0]) * 1;
