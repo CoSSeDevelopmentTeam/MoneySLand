@@ -37,7 +37,6 @@ import java.util.Map;
 public class SQLite3DataProvider {
 
     private MoneySLand plugin;
-    private Statement statement;
 
     public SQLite3DataProvider(MoneySLand plugin) {
         this.plugin = plugin;
@@ -45,21 +44,32 @@ public class SQLite3DataProvider {
     }
 
     public void createLand(String owner, int startx, int startz, int endx, int endz, int size, String world) {
-        this.connect();
+        Connection connection = null;
         try {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
             statement.executeUpdate(
-                    "INSERT INTO land" +
+                    "insert into land" +
                             "(owner, startx, startz, endx, endz, size, world)" +
                             " VALUES("+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')"
             );
             this.printAllData();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
     public int deleteLand(String name, int x, int z, String world) {
-        this.connect();
+        Connection connection = null;
         Map<String, Object> land = getLand(x, z, world);
         int id;
         try{
@@ -71,6 +81,9 @@ public class SQLite3DataProvider {
         String owner = (String) land.get("owner");
         int size;
         try {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
             if(owner.equals(name)) {
                 size = (int) land.get("size");
                 statement.executeUpdate("DELETE from land WHERE id = "+ id);
@@ -81,14 +94,25 @@ public class SQLite3DataProvider {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return 0;
     }
 
     public Map<String, Object> getLand(int x, int z, String world) {
-        this.connect();
+        Connection connection = null;
         Map<String, Object> list = new HashMap<String, Object>();
         try {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
             ResultSet rs = statement.executeQuery(
                     "SELECT * from land WHERE (startx <= "+ x +" and endx >= "+ x +")" +
                             " and " +
@@ -126,14 +150,25 @@ public class SQLite3DataProvider {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return null;
     }
 
     public Map<String, Object> getLandById(int id) {
-        this.connect();
+        Connection connection = null;
         Map<String, Object> list = new HashMap<String, Object>();
         try {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
             ResultSet rs = statement.executeQuery("SELECT * from land WHERE (id = "+ id +")");
             while(rs.next()) {
                 list.put("id", rs.getInt("id"));
@@ -149,13 +184,24 @@ public class SQLite3DataProvider {
             return list;
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return null;
     }
 
     public List<Integer> getAllLands() {
+        Connection connection = null;
         try {
-            this.connect();
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
             List<Integer> ids = new ArrayList<Integer>();
             ResultSet rs = statement.executeQuery("SELECT * from land");
             while(rs.next()){
@@ -164,13 +210,24 @@ public class SQLite3DataProvider {
             return ids;
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return null;
     }
 
     public boolean existsLand(int x, int z, String world) {
+        Connection connection = null;
         try {
-            this.connect();
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
             Map<String, Object> list = new HashMap<String, Object>();
             ResultSet rs = statement.executeQuery("SELECT * from land WHERE (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
             while(rs.next()) {
@@ -205,28 +262,50 @@ public class SQLite3DataProvider {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return false;
     }
 
     public void addGuest(int id, String name) {
-        this.connect();
+        Connection connection = null;
         Map<String, Object> land = getLandById(id);
 
         if(land == null)return;
 
         try {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
             statement.executeUpdate("INSERT INTO invite(id, name) VALUES("+ id +", '"+ name +"'");
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return;
     }
 
     public boolean existsGuest(int id, String name) {
-        this.connect();
+        Connection connection = null;
         Map<String, Object> list = new HashMap<String, Object>();
         try {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
             ResultSet rs = statement.executeQuery("SELECT * from invite WHERE id = " + id + " and name = '" + name + "'");
             while(rs.next()) {
                 list.put("id", rs.getInt("id"));
@@ -234,6 +313,14 @@ public class SQLite3DataProvider {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return false;
     }
@@ -247,9 +334,9 @@ public class SQLite3DataProvider {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
-            statement = connection.createStatement();
+            Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);
-            statement.executeUpdate("CREATE table if not exists land " +
+            statement.executeUpdate("create table if not exists land " +
                     "(" +
                     "id integer primary key autoincrement, " +
                     "owner text not null, " +
@@ -262,7 +349,7 @@ public class SQLite3DataProvider {
                     ")"
             );
             statement.executeUpdate(
-                    "CREATE table if not exists invite " +
+                    "create table if not exists invite " +
                             "(" +
                             "id integer not null, " +
                             "name text not null" +
@@ -270,11 +357,23 @@ public class SQLite3DataProvider {
             );
         } catch(SQLException e) {
             System.err.println(e.getMessage());
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
     public boolean checkOverTrap(int[] start, int[] end, String world) {
+        Connection connection = null;
         try {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
             ResultSet rs = statement.executeQuery(
                     "select * from land " +
                     "WHERE (start[0] <= startx AND start[1] <= startz AND end[0] >= startx AND end[1] >= startz) OR " +
@@ -286,11 +385,23 @@ public class SQLite3DataProvider {
         } catch (SQLException e) {
             e.printStackTrace();
             return true;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
     public void printAllData() {
+        Connection connection = null;
         try {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().toString() + "/DataDB.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
             ResultSet rs = statement.executeQuery("select * from land");
             while(rs.next()) {
                 System.out.println("-----------------------");
@@ -306,6 +417,14 @@ public class SQLite3DataProvider {
             rs.close();
         } catch (SQLException e) {
             System.err.println(e.getMessage());
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
