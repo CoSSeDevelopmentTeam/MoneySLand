@@ -4,7 +4,7 @@
   <groupId>net.comorevi</groupId>
   <artifactId>MoneySLand</artifactId>
   <name>MoneySLand</name>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <description>CosmoSunriseServer's plugin for Nukkit</description>
   <build>
     <plugins>
@@ -87,6 +87,13 @@
           <groupId>org.slf4j</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>net.comorevi</groupId>
+      <artifactId>MoneySAPI</artifactId>
+      <version>2.0.2-SNAPSHOT</version>
+      <scope>system</scope>
+      <systemPath>C:/Users/popkechupki/Desktop/jupiter/plugins/MoneySAPI-2.0.2-SNAPSHOT.jar</systemPath>
     </dependency>
   </dependencies>
   <properties>
