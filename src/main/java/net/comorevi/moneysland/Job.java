@@ -107,9 +107,11 @@ public class Job {
     }
 
     public boolean isValidValue() {
-        boolean result =
-                (start[0] == 0 && start[1] == 0) && (end[0] == 0 && end[1] == 0); // 配列の値が初期値か?
-        return result;
+        if (!((start[0] == 0 && start[1] == 0) && (end[0] == 0 && end[1] == 0))) { //初期値ではないか（初期値ではない、有効な値であれば真）
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public int[] getStart() {
