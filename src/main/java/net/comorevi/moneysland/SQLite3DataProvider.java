@@ -42,10 +42,10 @@ public class SQLite3DataProvider {
         this.connect();
     }
 
-    public void createLand(int id, String owner, int startx, int startz, int endx, int endz, int size, String world) {
+    public void createLand(String owner, int startx, int startz, int endx, int endz, int size, String world) {
         this.connect();
         try {
-            statement.executeUpdate("INSERT INTO land(id, owner, startx, startz, endx, endz, size, world) VALUES(" + id + ", '"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')");
+            statement.executeUpdate("INSERT INTO land(owner, startx, startz, endx, endz, size, world) VALUES('"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -156,26 +156,9 @@ public class SQLite3DataProvider {
                 list.put("size", rs.getInt("size"));
                 list.put("world", rs.getString("world"));
             }
-            if(!list.isEmpty()){
-                return (int) list.get("id") > 0;
-            }else{
-                list = new HashMap<String, Object>();
-                //!Fami //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and endx <= "+ x +") and (startz >= "+ z +" and endz <= "+ z +") and world = '"+ world +"'");
-                ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and startz <= "+ z +") and (endx >= "+ x +" and endz >= "+ z +") and world = '"+ world +"'");
-                //EconomyLand //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (endx > "+ x +" and endz > "+ z +") and (startx < "+ x +" and startz <= "+ z +") and world = '"+ world +"'");
-                //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx < "+ x +" and endx > "+ x +") and (startz < "+ z +" and endz > "+ z +") and world = '"+ world +"'");
-                while(rs1.next()) {
-                    list.put("id", rs.getInt("id"));
-                    list.put("owner", rs.getString("owner"));
-                    list.put("startx", rs.getInt("startx"));
-                    list.put("startz", rs.getInt("startz"));
-                    list.put("endx", rs.getInt("endx"));
-                    list.put("endz", rs.getInt("endz"));
-                    list.put("size", rs.getInt("size"));
-                    list.put("world", rs.getString("world"));
-                }
-                return (int) list.get("id") > 0;
-            }
+
+            return !list.isEmpty() ? (int) list.get("id") > -1 : false;
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

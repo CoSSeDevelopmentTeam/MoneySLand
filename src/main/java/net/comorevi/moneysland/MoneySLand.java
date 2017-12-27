@@ -75,7 +75,6 @@ public class MoneySLand extends PluginBase {
     private static final String UNIT = "MS";
     private static int landPrice = 100;
     private static int landSize = 500;
-    private static int landId;
 
     private MoneySAPI money;
     private SQLite3DataProvider sql;
@@ -121,8 +120,8 @@ public class MoneySLand extends PluginBase {
         return sql.existsLand(x, z, world);
     }
 
-    public void createLand(int id, String owner, int[] start, int[] end, int size, String world) {
-        sql.createLand(id, owner, start[0], start[1], end[0], end[1], size, world);
+    public void createLand(String owner, int[] start, int[] end, int size, String world) {
+        sql.createLand(owner, start[0], start[1], end[0], end[1], size, world);
     }
 
     public int deleteLand(String name, int x, int z, String world){
@@ -412,11 +411,7 @@ public class MoneySLand extends PluginBase {
 
                         String nameB = p.getName().toLowerCase();
                         if(this.money.getMoney(p) >=price){
-                            int id = this.getConfig().getInt("landId");
-                            this.createLand(id, nameB, start, end, s, worldName);
-                            id++;
-                            this.getConfig().set("landId", id);
-                            this.getConfig().save();
+                            this.createLand(nameB, start, end, s, worldName);
                             p.sendMessage(TextValues.INFO + this.translateString("player-landBuy", String.valueOf(s), String.valueOf(price), UNIT));
                             this.money.setMoney(p, this.money.getMoney(p) - price);
                             this.resetLandData(name);
@@ -722,7 +717,6 @@ public class MoneySLand extends PluginBase {
             this.conf.set("landSize", -1);
             this.conf.set("worldProtect", new ArrayList<String>());
             this.conf.set("NoBuyWorld", new ArrayList<String>());
-            this.conf.set("landId", 0);
             this.conf.save();
         }
 
@@ -733,7 +727,6 @@ public class MoneySLand extends PluginBase {
         /*コンフィグからデータを取得*/
         landPrice = (int) pluginData.get("landPrice");
         landSize = (int) pluginData.get("landSize");
-        landId = (int) pluginData.get("landId");
         this.worldProtect = conf.getStringList("worldProtect");
         this.NoBuyWorld = conf.getStringList("NoBuyWorld");
 
