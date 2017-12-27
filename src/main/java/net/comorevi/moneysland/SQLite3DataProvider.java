@@ -346,11 +346,14 @@ public class SQLite3DataProvider {
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);
             ResultSet rs = statement.executeQuery(
+                    "SELECT * from land WHERE (startx <= "+ start[0] +" and endx >= "+ end[0] +") and (startz <= "+ start[1] +" and endz >= "+ end[1] +") and world = '"+ world +"'"
+                    /*
                     "select * from land " +
                     "WHERE (" + start[0] + "<= startx AND" + start[1] + "<= startz AND " + end[0] + ">= startx AND" +  end[1] + ">= startz) OR " +
                     "(" + start[0] + "<= endx AND" + start[1] + "<= startz AND" + end[0] + ">= endx AND" + end[1] + ">= startz) OR " +
                     "(" + start[0] + "<= startx AND" + start[1] + "<= endz AND" + end[0] + ">= startx AND" + end[1] + ">= endz) OR " +
-                    "(" + start[0] + "<= endx AND" + start[1] + "<= endz AND" + end[0] + ">= endx AND" + end[1] +">= endz)"
+                    "(" + start[0] + "<= endx AND" + start[1] + "<= endz AND" + end[0] + ">= endx AND" + end[1] + ">= endz)"
+                    */
             );
             return rs.next(); //次の要素があるか。即ち土地の被りがあるか
         } catch (SQLException e) {
