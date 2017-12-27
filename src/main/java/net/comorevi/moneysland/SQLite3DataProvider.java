@@ -52,7 +52,7 @@ public class SQLite3DataProvider {
             statement.executeUpdate(
                     "insert into land" +
                             "(owner, startx, startz, endx, endz, size, world)" +
-                            " VALUES("+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')"
+                            " VALUES('"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')"
             );
             this.printAllData();
         } catch (SQLException e) {
