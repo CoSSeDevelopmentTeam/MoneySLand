@@ -130,24 +130,24 @@ public class Job {
         // TODO エラーごとにメッセージを指定
         switch (error) {
             case ERROR_INVALID_VALUE:
-                message = "error-not-selected";
-                return main.translateString(message);
+                message = main.translateString("error-not-selected");
+                return message;
 
             case ERROR_NO_MONEY:
-                message = "error-no-money";
-                return main.translateString(message);
+                message = main.translateString("error-no-money");
+                return message;
 
             case ERROR_ALREADY_USED:
-                message = "error-land-alreadyused";
-                return main.translateString(message);
+                message = main.translateString("error-land-alreadyused");
+                return message;
 
             case ERROR_SIZE_LIMIT_OVER: //特別なやつなのでここで処理
-                message = "error-landSizeLimitOver";
-                return main.translateString(message, String.valueOf(main.calculateLandSize(player)), String.valueOf(MoneySLand.maxLandSize));
+                message = main.translateString("error-landSizeLimitOver", String.valueOf(main.calculateLandSize(player)), String.valueOf(MoneySLand.maxLandSize));
+                return message;
 
             default:
-                message = "error-notFoundKey";
-                return main.translateString(message);
+                message = main.translateString("error-notFoundKey");
+                return message;
         }
     }
 
