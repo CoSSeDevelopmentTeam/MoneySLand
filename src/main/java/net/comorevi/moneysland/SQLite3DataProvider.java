@@ -52,7 +52,7 @@ public class SQLite3DataProvider {
             statement.executeUpdate(
                     "insert into land" +
                             "(owner, startx, startz, endx, endz, size, world)" +
-                            " VALUES("+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')"
+                            " VALUES('"+ owner +"', "+ startx +", "+ startz +", "+ endx +", "+ endz +", "+ size +", '"+ world +"')"
             );
             this.printAllData();
         } catch (SQLException e) {
@@ -346,7 +346,7 @@ public class SQLite3DataProvider {
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);
             ResultSet rs = statement.executeQuery(
-                    "SELECT * from land WHERE (startx <= "+ start[0] +" and endx >= "+ end[0] +") and (startz <= "+ start[1] +" and endz >= "+ end[1] +") and world = '"+ world +"'"
+                    "SELECT * from land WHERE (startx <= "+ start[0] + " and endx >= "+ end[0] +") and (startz <= "+ start[1] + " and endz >= "+ end[1] +") and world = '"+ world +"'"
                     /*
                     "select * from land " +
                     "WHERE (" + start[0] + "<= startx AND" + start[1] + "<= startz AND " + end[0] + ">= startx AND" +  end[1] + ">= startz) OR " +

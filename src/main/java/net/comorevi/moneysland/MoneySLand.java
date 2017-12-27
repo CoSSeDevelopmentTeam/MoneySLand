@@ -200,7 +200,8 @@ public class MoneySLand extends PluginBase {
         this.initHelpFile();
 
         this.getLogger().info(this.translateString("message-onEnable"));
-        if(maxLandSize == -1){
+
+        if(maxLandSize < -1){
             this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, "無制限"));
         }else{
             this.getLogger().info(this.translateString(("message-onEnable2"), String.valueOf(landPrice), UNIT, String.valueOf(maxLandSize) + "ブロック"));
