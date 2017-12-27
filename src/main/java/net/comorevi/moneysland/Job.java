@@ -68,11 +68,6 @@ public class Job {
     public int buy() {
         MoneySLand main = MoneySLand.getInstance();
 
-        if(!isValidValue()) {
-            error = Job.ERROR_INVALID_VALUE;
-            return Job.JOB_ERROR;
-        }
-
         int[] pos1 = getStart();
         int[] pos2 = getEnd();
 
@@ -80,6 +75,11 @@ public class Job {
         start[1] = Math.min(pos1[1], pos2[1]); // z minimum
         end[0]   = Math.max(pos1[0], pos2[0]); // x maximum
         end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
+
+        if(isValidValue()) {
+            error = Job.ERROR_INVALID_VALUE;
+            return Job.JOB_ERROR;
+        }
 
         int price = main.calculateLandPrice(player);
         int size  = main.calculateLandSize(player);
@@ -125,32 +125,30 @@ public class Job {
     }
 
     public String getErrorMessage() {
+        MoneySLand main = MoneySLand.getInstance();
         String message = "";
         // TODO エラーごとにメッセージを指定
         switch (error) {
             case ERROR_INVALID_VALUE:
                 message = "error-not-selected";
-                break;
+                return main.translateString(message);
 
             case ERROR_NO_MONEY:
                 message = "error-no-money";
-                break;
+                return main.translateString(message);
 
             case ERROR_ALREADY_USED:
                 message = "error-land-alreadyused";
-                break;
+                return main.translateString(message);
 
             case ERROR_SIZE_LIMIT_OVER: //特別なやつなのでここで処理
                 message = "error-landSizeLimitOver";
-                MoneySLand main = MoneySLand.getInstance();
                 return main.translateString(message, String.valueOf(main.calculateLandSize(player)), String.valueOf(MoneySLand.maxLandSize));
 
             default:
                 message = "error-notFoundKey";
-                break;
-
+                return main.translateString(message);
         }
-        return MoneySLand.getInstance().translateString(message);
     }
 
 }

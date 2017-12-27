@@ -34,6 +34,13 @@
             <version>3.19.3</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>net.comorevi</groupId>
+            <artifactId>MoneySAPI</artifactId>
+            <version>2.0.2-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}\lib\MoneySAPI-2.0.2-SNAPSHOT.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>

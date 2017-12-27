@@ -261,7 +261,7 @@ public class MoneySLand extends PluginBase {
 
                     job.start(startX, startZ);
 
-                    p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(2), String.valueOf(startX), String.valueOf(startZ)));
+                    p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(1), String.valueOf(startX), String.valueOf(startZ)));
 
                     return true;
 
@@ -302,13 +302,10 @@ public class MoneySLand extends PluginBase {
 
                     job = Job.get(p);
 
-                    if(job == null || !(job.getStatus() == Job.IN_ENTRY && job.isValidValue())) { //選択されていないか、もしくは購入後か?
+                    if(job == null || !(job.getStatus() == Job.IN_ENTRY)) { //選択されていないか、もしくは購入後か?
                         p.sendMessage(this.translateString("error-not-selected"));
                         return true;
                     }
-
-                    String worldName = p.getLevel().getName();
-
 
                     switch(job.buy()) {
                         case Job.JOB_SUCCESSFUL:
