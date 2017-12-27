@@ -142,7 +142,7 @@ public class MoneySLand extends PluginBase {
                 return !(this.isWorldProtect(world));
             }
 
-            String name = player.getName().toLowerCase();
+            String name = player.getName();
 
             if(land.get("owner").equals(name)){
                 return true;
@@ -241,7 +241,7 @@ public class MoneySLand extends PluginBase {
                 return true;
             }
 
-            String name = sender.getName().toLowerCase();
+            String name = sender.getName();
 
             Player p = (Player)sender;
             Job job;
@@ -367,7 +367,7 @@ public class MoneySLand extends PluginBase {
 
                     if(land != null){
                         if(land.get("owner").equals(name)){
-                            String guest = args[2].toLowerCase();
+                            String guest = args[2];
                             if(!(this.getSQL().existsGuest(id, guest))){
                                 p.sendMessage(TextValues.INFO + this.translateString("player-landInvited", name, guest));
                                 if(this.getServer().getPlayer(guest) != null){

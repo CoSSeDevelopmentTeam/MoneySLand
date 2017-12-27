@@ -100,7 +100,7 @@ public class Job {
         }
 
         MoneySAPI.getInstance().addMoney(player, -price);
-        main.createLand(player.getName().toLowerCase(), start, end, size, world.toLowerCase());
+        main.createLand(player.getName(), start, end, size, world);
 
         status = BOUGHT;
         return Job.JOB_SUCCESSFUL;
