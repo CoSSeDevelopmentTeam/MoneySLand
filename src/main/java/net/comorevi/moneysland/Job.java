@@ -76,7 +76,7 @@ public class Job {
         end[0]   = Math.max(pos1[0], pos2[0]); // x maximum
         end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
 
-        if(isValidValue()) {
+        if(!isValidValue()) {
             error = Job.ERROR_INVALID_VALUE;
             return Job.JOB_ERROR;
         }
