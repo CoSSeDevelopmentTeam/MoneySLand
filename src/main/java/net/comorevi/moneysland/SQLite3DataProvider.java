@@ -127,27 +127,16 @@ public class SQLite3DataProvider {
                 list.put("size", rs.getInt("size"));
                 list.put("world", rs.getString("world"));
             }
+
             if(!list.isEmpty()){
                 rs.close();
                 return (list.size() > 0) ? list : null;
+
             }else{
-                list = new HashMap<String, Object>();
-                //!Fami //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and endx <= "+ x +") and (startz >= "+ z +" and endz <= "+ z +") and world = '"+ world +"'");
-                ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and startz <= "+ z +") and (endx >= "+ x +" and endz >= "+ z +") and world = '"+ world +"'");
-                //EconomyLand //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (endx > "+ x +" and endz > "+ z +") and (startx < "+ x +" and startz <= "+ z +") and world = '"+ world +"'");
-                while(rs1.next()) {
-                    list.put("id", rs.getInt("id"));
-                    list.put("owner", rs.getString("owner"));
-                    list.put("startx", rs.getInt("startx"));
-                    list.put("startz", rs.getInt("startz"));
-                    list.put("endx", rs.getInt("endx"));
-                    list.put("endz", rs.getInt("endz"));
-                    list.put("size", rs.getInt("size"));
-                    list.put("world", rs.getString("world"));
-                }
-                rs1.close();
-                return (list.size() > 0) ? list : null;
+                rs.close();
+                return null;
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -240,26 +229,8 @@ public class SQLite3DataProvider {
                 list.put("size", rs.getInt("size"));
                 list.put("world", rs.getString("world"));
             }
-            if(!list.isEmpty()){
-                return (int) list.get("id") > 0;
-            }else{
-                list = new HashMap<String, Object>();
-                //!Fami //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and endx <= "+ x +") and (startz >= "+ z +" and endz <= "+ z +") and world = '"+ world +"'");
-                ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx >= "+ x +" and startz <= "+ z +") and (endx >= "+ x +" and endz >= "+ z +") and world = '"+ world +"'");
-                //EconomyLand //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (endx > "+ x +" and endz > "+ z +") and (startx < "+ x +" and startz <= "+ z +") and world = '"+ world +"'");
-                //ResultSet rs1 = statement.executeQuery("SELECT * from land WHERE (startx < "+ x +" and endx > "+ x +") and (startz < "+ z +" and endz > "+ z +") and world = '"+ world +"'");
-                while(rs1.next()) {
-                    list.put("id", rs.getInt("id"));
-                    list.put("owner", rs.getString("owner"));
-                    list.put("startx", rs.getInt("startx"));
-                    list.put("startz", rs.getInt("startz"));
-                    list.put("endx", rs.getInt("endx"));
-                    list.put("endz", rs.getInt("endz"));
-                    list.put("size", rs.getInt("size"));
-                    list.put("world", rs.getString("world"));
-                }
-                return (int) list.get("id") > 0;
-            }
+
+            return !list.isEmpty() ? (int) list.get("id") > 0 : false;
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -376,10 +347,10 @@ public class SQLite3DataProvider {
             statement.setQueryTimeout(30);
             ResultSet rs = statement.executeQuery(
                     "select * from land " +
-                    "WHERE (start[0] <= startx AND start[1] <= startz AND end[0] >= startx AND end[1] >= startz) OR " +
-                    "(start[0] <= endx AND start[1] <= startz AND end[0] >= endx AND end[1] >= startz) OR " +
-                    "(start[0] <= startx AND start[1] <= endz AND end[0] >= startx AND end[1] >= endz) OR " +
-                    "(start[0] <= endx AND start[1] <= endz AND end[0] >= endx AND end[1] >= endz)"
+                    "WHERE (" + start[0] + "<= startx AND" + start[1] + "<= startz AND " + end[0] + ">= startx AND" +  end[1] + ">= startz) OR " +
+                    "(" + start[0] + "<= endx AND" + start[1] + "<= startz AND" + end[0] + ">= endx AND" + end[1] + ">= startz) OR " +
+                    "(" + start[0] + "<= startx AND" + start[1] + "<= endz AND" + end[0] + ">= startx AND" + end[1] + ">= endz) OR " +
+                    "(" + start[0] + "<= endx AND" + start[1] + "<= endz AND" + end[0] + ">= endx AND" + end[1] +">= endz)"
             );
             return rs.next(); //次の要素があるか。即ち土地の被りがあるか
         } catch (SQLException e) {

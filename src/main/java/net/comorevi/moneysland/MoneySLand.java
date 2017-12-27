@@ -77,7 +77,6 @@ public class MoneySLand extends PluginBase {
     private static final String UNIT = "MS";
     public static int landPrice = 100;
     public static int maxLandSize = 500;
-    private static int landId;
 
     private MoneySAPI money;
     private SQLite3DataProvider sql;
@@ -153,9 +152,9 @@ public class MoneySLand extends PluginBase {
             return false;
         }
     }
-    
+
     public boolean isNoBuyWorld(String worldname){
-    	return this.NoBuyWorld.contains(worldname);
+        return this.NoBuyWorld.contains(worldname);
     }
 
     /**************/
@@ -215,6 +214,8 @@ public class MoneySLand extends PluginBase {
         }
 
         this.sql = new SQLite3DataProvider(this);
+
+        instance = this;
     }
 
     @Override
@@ -248,11 +249,11 @@ public class MoneySLand extends PluginBase {
 
             switch(args[0]){
                 case "start":
-                	
-                	if(isNoBuyWorld(p.getLevel().getName())){
-                		p.sendMessage(TextValues.WARNING + this.translateString("error-cannotBuy"));
+
+                    if(isNoBuyWorld(p.getLevel().getName())){
+                        p.sendMessage(TextValues.WARNING + this.translateString("error-cannotBuy"));
                         return true;
-                	}
+                    }
 
                     job = Job.create(p);
 
@@ -266,11 +267,11 @@ public class MoneySLand extends PluginBase {
                     return true;
 
                 case "end":
-                	
-                	if(isNoBuyWorld(p.getLevel().getName())){
-                		p.sendMessage(TextValues.WARNING + this.translateString("error-cannotBuy"));
+
+                    if(isNoBuyWorld(p.getLevel().getName())){
+                        p.sendMessage(TextValues.WARNING + this.translateString("error-cannotBuy"));
                         return true;
-                	}
+                    }
 
                     job = Job.get(p);
 
@@ -619,7 +620,6 @@ public class MoneySLand extends PluginBase {
             this.conf.set("landSize", -1);
             this.conf.set("worldProtect", new ArrayList<String>());
             this.conf.set("NoBuyLand", new ArrayList<String>());
-            this.conf.set("landId", 0);
             this.conf.save();
         }
 
@@ -630,7 +630,6 @@ public class MoneySLand extends PluginBase {
         /*コンフィグからデータを取得*/
         landPrice = (int) pluginData.get("landPrice");
         maxLandSize = (int) pluginData.get("landSize");
-        landId = (int) pluginData.get("landId");
         this.worldProtect = conf.getStringList("worldProtect");
         this.NoBuyWorld = conf.getStringList("NoBuyWorld");
 
