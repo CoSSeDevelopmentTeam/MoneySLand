@@ -258,8 +258,8 @@ public class MoneySLand extends PluginBase {
 
                     job = Job.create(p);
 
-                    int startX = (int)p.getX();
-                    int startZ = (int)p.getZ();
+                    int startX = p.getFloorX();
+                    int startZ = p.getFloorZ();
 
                     job.start(startX, startZ);
 

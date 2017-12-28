@@ -70,11 +70,15 @@ public class Job {
 
         int[] pos1 = getStart();
         int[] pos2 = getEnd();
+        
+        System.out.println(pos1[0] + "::" + pos1[1] + "::" + pos2[0] + "::" + pos2[1]);
 
         start[0] = Math.min(pos1[0], pos2[0]); // x minimum
         start[1] = Math.min(pos1[1], pos2[1]); // z minimum
         end[0]   = Math.max(pos1[0], pos2[0]); // x maximum
         end[1]   = Math.max(pos1[1], pos2[1]); // z maximum
+        
+        System.out.println(start[0] + "::" + start[1] + "::" + end[0] + "::" + end[1]);
 
         if(!isValidValue()) {
             error = Job.ERROR_INVALID_VALUE;

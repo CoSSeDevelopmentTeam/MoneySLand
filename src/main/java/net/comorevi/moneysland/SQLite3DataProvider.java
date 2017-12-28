@@ -382,7 +382,7 @@ public class SQLite3DataProvider {
                 System.out.println("id = " + rs.getInt("id"));
                 System.out.println("owner = " + rs.getString("owner"));
                 System.out.println("startx = " + rs.getInt("startx"));
-                System.out.println("startz = " + rs.getInt("startx"));
+                System.out.println("startz = " + rs.getInt("startz"));
                 System.out.println("endx = " + rs.getInt("endx"));
                 System.out.println("endz = " + rs.getInt("endz"));
                 System.out.println("size = " + rs.getInt("size"));
