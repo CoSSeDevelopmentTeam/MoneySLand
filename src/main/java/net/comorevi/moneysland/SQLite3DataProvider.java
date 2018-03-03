@@ -219,6 +219,7 @@ public class SQLite3DataProvider {
             statement.setQueryTimeout(30);
             Map<String, Object> list = new HashMap<String, Object>();
             ResultSet rs = statement.executeQuery("SELECT * from land WHERE (startx <= "+ x +" and endx >= "+ x +") and (startz <= "+ z +" and endz >= "+ z +") and world = '"+ world +"'");
+            /*
             while(rs.next()) {
                 list.put("id", rs.getInt("id"));
                 list.put("owner", rs.getString("owner"));
@@ -231,6 +232,8 @@ public class SQLite3DataProvider {
             }
 
             return !list.isEmpty() ? (int) list.get("id") > 0 : false;
+            */
+            return rs.next();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

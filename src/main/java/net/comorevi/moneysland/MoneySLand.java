@@ -258,8 +258,8 @@ public class MoneySLand extends PluginBase {
 
                     job = Job.create(p);
 
-                    int startX = (int)p.getX();
-                    int startZ = (int)p.getZ();
+                    int startX = p.getFloorX();
+                    int startZ = p.getFloorZ();
 
                     job.start(startX, startZ);
 
@@ -283,8 +283,8 @@ public class MoneySLand extends PluginBase {
 
                     int endX = p.getFloorX();
                     int endZ = p.getFloorZ();
+                    
                     job.end(endX, endZ);
-
 
                     p.sendMessage(TextValues.INFO + this.translateString("player-setPosition", String.valueOf(2), String.valueOf(endX), String.valueOf(endZ)));
 
